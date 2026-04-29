@@ -34,6 +34,27 @@ There is no `/wiki:migrate` command and there should never be one. Lint rules **
 - **Warning**: Inconsistency — mismatched counts, stale dates, non-bidirectional links
 - **Suggestion**: Improvement opportunity — new connections, missing tags, content gaps
 
+## Scoping Rules (HUB-level checks)
+
+Several checks (C11 placement, C12 unknown-file quarantine) walk the HUB directory itself. The HORDE fork supports two workspace topologies:
+
+| Topology | How to detect | Lint behavior at HUB |
+|----------|--------------|----------------------|
+| **Standalone workspace** — workspace owns its directory exclusively (e.g., upstream nvk default at `~/wiki/`) | No `.fortissimo-vault.json` sentinel at HUB | Strict: every item at HUB must be in the allowlist; foreign items flagged as unknown |
+| **Embedded workspace** — workspace is a tenant inside a host directory that holds other content (e.g., a Fortissimo wiki at the root of an existing project repo) | `.fortissimo-vault.json` sentinel present at HUB | Scoped: wiki-owned items are validated against the allowlist; **foreign items at HUB are ignored, not flagged**. The wiki "owns" only its registered paths. |
+
+**Wiki-owned items at HUB** (the scope of HUB-level lint when a sentinel is present):
+
+- The HUB allowlist itself: `.fortissimo-vault.json`, `wikis.json`, `_index.md`, `wiki_log.md`, `topics/`
+- Anything explicitly registered under `local_wikis` in `wikis.json` (out-of-tree paths anyway, not at HUB)
+- The contents of `topics/` (each topic is recursively wiki-owned per its own allowlists)
+
+Anything else at HUB level — host-project source files, `.git/`, sibling tools' configs, unrelated subdirectories — is **out of scope for HUB-level lint when the sentinel is present**. Per-topic lint is unaffected; once execution descends into `topics/<name>/`, all checks apply normally.
+
+This rule applies to C11 (placement) and C12 (unknown-file quarantine) at HUB level only. It does not relax checks inside `topics/<name>/raw/`, `topics/<name>/wiki/`, or any topic-internal directory.
+
+**Why scoped, not strict, for embedded workspaces**: a strict walk would flag every host-project file as unknown — useless noise that hides actionable findings inside the wiki itself. The sentinel's job is to mark the wiki's footprint within a possibly-larger directory; scoped lint honors that contract.
+
 ## Check Catalog
 
 ### C1: Structure (Critical)
@@ -174,8 +195,8 @@ A `raw/` or `wiki/` file's correct path is a pure function of its frontmatter. M
 **Checks**:
 
 - [ ] For every `.md` file under `raw/` and `wiki/` (excluding `_index.md` and `config.md`), compute the expected directory from frontmatter and compare to the actual directory.
-- [ ] Raw sources at the hub level (not inside a topic wiki) → misplaced. Hub must only contain `wikis.json`, `_index.md`, `wiki_log.md`, and `topics/`.
-- [ ] Content directories (`raw/`, `wiki/`, `output/`, `inbox/`) at the hub level → misplaced. Move contents into a topic wiki or quarantine.
+- [ ] Raw sources at the hub level (not inside a topic wiki) → misplaced. The hub's wiki-owned items are `.fortissimo-vault.json` (sentinel, when present), `wikis.json`, `_index.md`, `wiki_log.md`, and `topics/`. See **Scoping Rules** above for embedded-workspace behavior — when a sentinel is present, foreign items at HUB are ignored, not flagged.
+- [ ] Content directories (`raw/`, `wiki/`, `output/`, `inbox/`) at the hub level → misplaced **in standalone workspaces only**. In embedded workspaces (sentinel present), such directories belong to the host project and are out of scope for HUB-level lint; only flag if they appear inside a `topics/<name>/` subtree where they don't belong.
 - [ ] Files with missing or unreadable frontmatter → defer to C2 (frontmatter fix) before placement can be determined.
 - [ ] Out of scope: anything under `output/projects/`. Project-level placement is C8/C9.
 
@@ -189,7 +210,7 @@ Any file that is not in the canonical allowlist for its location is either a use
 
 | Location | Allowed items |
 |----------|--------------|
-| HUB | `wikis.json`, `_index.md`, `wiki_log.md`, `topics/` |
+| HUB | `.fortissimo-vault.json` (sentinel — HORDE fork), `wikis.json`, `_index.md`, `wiki_log.md`, `topics/` |
 | Topic wiki root | `_index.md`, `config.md`, `wiki_log.md`, `raw/`, `wiki/`, `output/`, `inbox/`, `.obsidian/`, `.librarian/`, `.audit/`, `.research-session.json`, `.thesis-session.json`, `.session-events.jsonl`, `.session-checkpoint.json` |
 | `raw/` | `_index.md`, `articles/`, `papers/`, `repos/`, `notes/`, `data/` |
 | `wiki/` | `_index.md`, `concepts/`, `topics/`, `references/`, `theses/` |
@@ -200,7 +221,7 @@ Any file that is not in the canonical allowlist for its location is either a use
 **Checks**:
 
 - [ ] Walk `raw/`, `wiki/`, and the wiki root. For each entry, check against the allowlist for that location.
-- [ ] Flag unknown files and directories.
+- [ ] Flag unknown files and directories. **At HUB level**: in embedded workspaces (sentinel present), foreign items at HUB are out of scope — they belong to the host directory, not the wiki. Only items matching the HUB allowlist are subject to validation. See **Scoping Rules** above.
 - [ ] Skip `output/` — C8 and C9 own that subtree.
 
 **Auto-fix**:

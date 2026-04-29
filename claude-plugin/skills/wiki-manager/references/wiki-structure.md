@@ -240,6 +240,17 @@ summary: "2-3 sentence summary"
 [Full content]
 ```
 
+### Optional Extensions
+
+Some skills emit additional fields on the raw frontmatter. They are not required by lint and pass through to the compiled wiki article when relevant. Documented extensions:
+
+| Field | Used by | Purpose |
+|---|---|---|
+| `confidence:` | `/wiki:ll` lessons-learned notes (`raw/notes/*-ll-*.md`) | Evidence-strength enum (`Confirmed | Stated | Inferred`) on the source itself; passes through to the compiled article on `/wiki:compile`. |
+| `lesson_count:` | `/wiki:ll` lessons-learned notes | Integer count of distinct lessons captured in the body. Used as an indexing hint. |
+
+Any field added by a future skill must be documented here before lint accepts it as a known extension. Unknown keys still surface as C13 warnings (potential alias needed or typo).
+
 ## Wiki Article Format (wiki/)
 
 ```markdown
@@ -288,6 +299,54 @@ This ensures both Obsidian (reads [[wikilink]]) and the agent (follows relative 
 
 - [Source Title](../../raw/type/file.md) — what this source contributed
 ```
+
+## Thesis Frontmatter (wiki/theses/)
+
+Thesis files are a sibling of wiki articles, distinguished by `type: thesis` (not `category:`) per C11 rule 1. They carry the canonical wiki-article fields **plus** investigation-specific extensions.
+
+```markdown
+---
+title: "Thesis: <thesis statement>"
+type: thesis
+status: investigating | concluded | abandoned
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tags: [tag1, tag2]
+summary: "<one-sentence summary of the thesis>"
+decay_class: fast | med | slow
+verified: YYYY-MM-DD
+
+# Investigation-specific extensions:
+verdict: pending | supported | refuted | inconclusive
+core_claim: "<one sentence — the thesis under test>"
+key_variables: [var1, var2, var3]
+falsification: "<what evidence would disprove this>"
+
+# Set on verdict, omitted during investigation:
+# confidence: Confirmed | Stated | Inferred
+# sources: [raw/type/file.md, ...]   # accumulated as research ingests
+---
+```
+
+### Field semantics
+
+| Field | Required | When set | Purpose |
+|---|---|---|---|
+| `status:` | yes | Lifecycle marker — `investigating` while research is active, `concluded` after verdict, `abandoned` if dropped | Filters thesis dashboards |
+| `verdict:` | yes | `pending` during investigation; one of `supported | refuted | inconclusive` after Phase 5 verdict | Drives thesis report rendering |
+| `core_claim:` | yes | Set once at thesis creation | The single-sentence claim under test (Karl Popper-style) |
+| `key_variables:` | yes | Set once at thesis creation | Scope filter — sources that don't touch these are skipped during research |
+| `falsification:` | yes | Set once at thesis creation | What evidence would disprove the thesis (forces specificity) |
+| `confidence:` | no during investigation | Set on verdict | Evidence-strength enum — same canonical values as articles |
+| `sources:` | no during investigation | Accumulated as `/wiki:research` ingests citations | Same shape as wiki articles |
+
+### Why `confidence:` is omitted during investigation
+
+The canonical confidence enum (`Confirmed | Stated | Inferred`) only meaningfully applies once a thesis has reached a verdict. During investigation the field would have to carry a placeholder value (e.g. `pending`) that isn't part of the enum, forcing lint to either accept a non-enum value or flag every in-flight thesis. Cleanest path: omit the field until verdict, then set it from the canonical enum.
+
+### Lint behavior
+
+C11 rule 1 routes `type: thesis` files to `wiki/theses/`. C2 still requires the canonical wiki-article fields. The investigation-specific extensions above are documented exceptions — lint must not flag them as unknown keys.
 
 ## Decay Class Classification
 

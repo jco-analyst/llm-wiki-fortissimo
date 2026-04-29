@@ -246,11 +246,15 @@ type: thesis
 status: investigating
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
+tags: [<topic-tags>]
+summary: "<one-sentence summary of the thesis under investigation>"
+decay_class: med
+verified: YYYY-MM-DD
 verdict: pending
-confidence: pending
 core_claim: "<one sentence>"
 key_variables: [var1, var2, var3]
 falsification: "<what would disprove this>"
+# confidence: omitted during investigation; set to Confirmed | Stated | Inferred when verdict is rendered
 ---
 
 # Thesis: <thesis statement>

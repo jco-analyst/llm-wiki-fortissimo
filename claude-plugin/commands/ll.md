@@ -104,12 +104,11 @@ Create `raw/notes/YYYY-MM-DD-ll-<slug>.md` in the target wiki:
 ```markdown
 ---
 title: "Lessons Learned: <session topic>"
-type: lessons-learned
+type: notes
 source: session
-date: YYYY-MM-DD
+ingested: YYYY-MM-DD
 tags: [lessons-learned, <topic-tags>]
 lesson_count: N
-category: notes
 confidence: Confirmed
 summary: "<one-line summary of what was learned>"
 ---
