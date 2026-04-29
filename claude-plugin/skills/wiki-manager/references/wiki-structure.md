@@ -103,13 +103,33 @@ When a command runs, first resolve the hub path (HUB) from `~/.config/llm-wiki/c
   "default": "<HUB>",
   "wikis": {
     "hub": { "path": "<HUB>", "description": "Global knowledge base" },
-    "<topic>": { "path": "<HUB>/topics/<topic>", "description": "..." }
+    "<topic>": { "path": "<HUB>/topics/<topic>", "description": "...", "commons": true },
+    "<client-topic>": { "path": "<HUB>/topics/<client>", "description": "...", "client": "<client-name>" },
+    "<personal-topic>": { "path": "<HUB>/topics/personal", "description": "...", "personal": true }
   },
   "local_wikis": [
     { "path": "/absolute/path/.wiki", "description": "..." }
   ]
 }
 ```
+
+### Isolation flags (HORDE fork — Pass 3)
+
+Each topic wiki entry carries one of three optional flags. They are **read by future isolation hooks and ignored in phase 0** — the registry is forward-compatible, but no enforcement happens yet.
+
+| Flag | Meaning | When to set |
+|---|---|---|
+| `commons: true` | Generally-applicable knowledge — visible to all sessions regardless of active client. Examples: cybersecurity frameworks, GRC methodology, standards crosswalks. | Topics that should be reusable across every client engagement and personal research. |
+| `client: "<name>"` | Engagement-specific knowledge — must not leak across clients. Example: `client: "uline"` for the Uline GRC engagement. | Topics rooted in a single client's data, deliverables, interviews, or systems. |
+| `personal: true` | The operator's own research, learning, and notes. Visible to the operator's sessions, not visible to client-scoped sessions. | One per workspace, owned by the workspace owner. |
+
+A topic wiki entry must have **exactly one** of these flags (commons, client, personal) — they are mutually exclusive.
+
+**Future isolation rule (deferred to a separate design doc when client #2 arrives):**
+
+> A session can see all `commons: true` topics, plus at most one `client:` topic at a time, plus the workspace owner's `personal: true` topic. Default-deny on cross-client visibility.
+
+Until that hook layer exists, the flags are documentation — they signal intent and let humans audit which topics have been correctly partitioned, but cross-topic peek operates without filtering. Do not write client-confidential material to a `commons:` topic; the lint rule (see `linting.md` C-isolation) flags such citations for review.
 
 ## _index.md Format
 
@@ -235,6 +255,16 @@ confidence: Confirmed|Stated|Inferred
 decay_class: fast|med|slow
 verified: YYYY-MM-DD
 summary: "2-3 sentence summary for index"
+
+# HORDE fork — Fortissimo additions (all optional, additive to nvk schema)
+pillar: people_org|process_workflows|technology|third_party
+source_provenance:
+  chat_url: https://claude.ai/chat/...
+  date: YYYY-MM-DD
+  extraction: "context describing how the source was extracted"
+em_refs: [FACT-PRO-2025-001, FACT-PEO-2026-008]
+supersedes: [old-article-slug]
+superseded_by: [new-article-slug]
 ---
 
 # Article Title
@@ -287,6 +317,60 @@ Each article's freshness is a composite of four dimensions, each contributing 0-
 Each dimension's decay curve is scaled by the article's `decay_class` tier — a `fast` article's source freshness decays faster than a `slow` one's. The Lindy Effect applies: `slow` content that has survived without needing updates is more durable, not less.
 
 The freshness threshold is set per wiki in `config.md` (default: 70). Articles scoring below the threshold are flagged by lint. There are no hardcoded day cutoffs — the composite score naturally flags the right articles at the right time based on their decay class and the actual state of their sources.
+
+## Fortissimo Frontmatter Fields (HORDE fork — Pass 5)
+
+Four optional fields are added on top of nvk's schema for cross-citation with Aziz's Engagement Memory v1.5 and supersession discipline. All four are additive — articles without them stay valid; lint does not require them.
+
+### `pillar:`
+
+Marks which Fortissimo pillar an article belongs to. Used for cross-citation with EM entries (which carry the same pillar slugs). One of:
+
+| Slug | Display | Covers |
+|---|---|---|
+| `people_org` | People & Organization | Roles, RACI, governance, org charts, headcount |
+| `process_workflows` | Process & Workflows | Methodology, runbooks, four-question framework, citation discipline |
+| `technology` | Technology | Tools, infra, platforms, vendor specs |
+| `third_party` | Third Party | Suppliers, contractors, regulators, external auditors, frameworks-as-orgs |
+
+Optional in `commons:` and `personal:` topics. Recommended in `client:` topics so EM and RC stay aligned.
+
+### `source_provenance:`
+
+Aziz's structured citation block, alongside nvk's machine-readable `sources: [path]` list. Extracts the chat URL, date, and human description of how the source was obtained. Use when the source came from a Claude/ChatGPT conversation, an interview transcript, or another reconstructed-from-context artifact where the bare path doesn't tell the full story.
+
+```yaml
+source_provenance:
+  chat_url: https://claude.ai/chat/<id>
+  date: 2026-04-29
+  extraction: "Aziz GRC SecOps onboarding conversation — section 3 (third-party risk)"
+```
+
+When both `sources:` and `source_provenance:` are present, `sources:` is the canonical machine-readable list; `source_provenance:` is the human audit trail.
+
+### `em_refs:`
+
+List of Engagement Memory entry IDs that this article references or derives from. Lets a reader (or hook) trace from an RC article back to the EM facts/decisions it rests on.
+
+```yaml
+em_refs: [FACT-PRO-2025-001, FACT-PEO-2026-008, DEC-TEC-2026-003]
+```
+
+Phase 0 cross-citation is **one-way**: RC articles can list EM entry IDs, but EM v1.5 files don't carry RC slugs. Bidirectional linking is deferred to phase 2 EM migration.
+
+### `supersedes:` / `superseded_by:`
+
+Cross-version supersession (per Fortissimo §2.2). When a new article replaces an older one (e.g., NIST CSF 2.0 → 3.0, or a methodology revision), set both ends:
+
+```yaml
+# In nist-csf-3-0.md:
+supersedes: [nist-csf-2-0]
+
+# In nist-csf-2-0.md:
+superseded_by: [nist-csf-3-0]
+```
+
+The superseded article stays in the wiki — it's the historical record. Lint warns if `superseded_by:` is set but the new article doesn't exist (broken supersession chain). Cross-references in active articles should prefer the most-recent version unless the historical one is what's actually being cited.
 
 ## Dual-Link Convention
 

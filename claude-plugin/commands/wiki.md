@@ -1,13 +1,14 @@
 ---
 description: "LLM wiki knowledge base — understands natural language. Say what you want (add a URL, ask a question, research a topic, audit an output, resume work) and it routes to the right subcommand. Also handles init, status, and config."
-argument-hint: "[<natural language request>] [init <topic-name> [--local]] [config hub-path [<path>]] [--wiki <name>]"
+argument-hint: "[<natural language request>] [init <topic-name> [--local|--commons|--client <name>|--personal]] [config hub-path [<path>]] [--wiki <name>]"
 allowed-tools: Read, Write, Edit, Glob, Bash(ls:*), Bash(wc:*), Bash(mkdir:*), Bash(date:*), Bash(mv:*)
 ---
 
 ## Your task
 
 **Resolve the wiki.** Do NOT search the filesystem or read reference files — follow these steps:
-1. Read `$HOME/.config/llm-wiki/config.json`. If it has `resolved_path` → HUB = that value, skip to step 3. If only `hub_path`, expand leading `~` only (not tildes in `com~apple~CloudDocs`), set HUB, write `resolved_path` back, skip to step 3.
+0. **(HORDE fork)** Walk up from `cwd` looking for `.fortissimo-vault.json`. Stop at first match (or at `$HOME` / filesystem root with no match). If found → HUB = the directory containing the sentinel; read the sentinel for `topics_root` (default `topics`) and `default_topic`; skip to step 3.
+1. If no sentinel, read `$HOME/.config/llm-wiki/config.json`. If it has `resolved_path` → HUB = that value, skip to step 3. If only `hub_path`, expand leading `~` only (not tildes in `com~apple~CloudDocs`), set HUB, write `resolved_path` back, skip to step 3.
 2. If no config → read `$HOME/wiki/_index.md`. If it exists → HUB = `$HOME/wiki`. If nothing found, ask the user where to create the wiki.
 3. **Wiki location** (first match): `--local` → `.wiki/` in CWD; `--wiki <name>` → `HUB/wikis.json` lookup; CWD has `.wiki/` → use it; else → HUB.
 4. Read `<wiki>/_index.md` if found. Variant: **wiki-neutral** — `wiki.md` is the router, init, and config command, so "wiki missing" is not always an error; the init subcommand creates the wiki, status shows an empty hub gracefully, and the natural-language router explains how to create one.
@@ -21,18 +22,37 @@ You are the llm-wiki knowledge base manager. Read the skill at `skills/wiki-mana
 Initialize a new wiki. Parse arguments:
 - `init <name>` → create topic wiki at `HUB/topics/<name>/`
 - `init <name> --local` → create local wiki at `.wiki/` in current project
+- `init <name> --commons` → register as commons topic (visible to all sessions; HORDE fork)
+- `init <name> --client <client-name>` → register as client-scoped topic (HORDE fork)
+- `init <name> --personal` → register as the operator's personal topic (HORDE fork)
 - `init` (no name) → ask: "What topic is this for?" Then create the topic wiki with their answer.
 
 **A topic name is always required.** There is no bare global wiki — HUB is only a hub (wikis.json + _index.md + log.md). All content lives in topic sub-wikis.
 
+**Isolation flag (HORDE fork):** if none of `--commons|--client|--personal` is provided, ask the user:
+> Is this topic generally-applicable knowledge (commons), engagement-specific (client), or your personal research (personal)?
+
+Exactly one must be chosen. The flag is recorded in `wikis.json` for the future isolation hook layer. See `references/wiki-structure.md` § "Isolation flags" for the full rule.
+
 **Steps:**
 
 1. If HUB doesn't exist yet, create the hub first:
+   - `HUB/.fortissimo-vault.json` (workspace sentinel — HORDE fork). Ask the user for `workspace_name` (default: directory basename) and `owner`. Write:
+     ```json
+     {
+       "workspace_name": "<answer>",
+       "owner": "<answer>",
+       "created": "YYYY-MM-DD",
+       "em_root": "em",
+       "topics_root": "topics",
+       "default_topic": "<first topic name>"
+     }
+     ```
    - `HUB/wikis.json` (empty registry)
    - `HUB/_index.md` (hub index with empty topic wiki table)
    - `HUB/log.md` (global activity log)
-   - `HUB/topics/` directory
-   - NO `raw/`, `wiki/`, `output/`, `inbox/`, `config.md`, or `.obsidian/` at the hub level.
+   - `HUB/topics/` directory (or `HUB/<topics_root>/` if the sentinel's `topics_root` differs from `topics`)
+   - NO `raw/`, `wiki/`, `output/`, `inbox/`, `config.md`, or `.obsidian/` at the hub level. Aziz's Engagement Memory files live at `HUB/em/` (or `HUB/<em_root>/`) and are owned by EM, not the wiki — never create or modify them here.
 
 2. Create the topic wiki directory structure:
    - `inbox/`, `inbox/.processed/`
@@ -85,7 +105,7 @@ Initialize a new wiki. Parse arguments:
 
 6. Ask the user: "What is this wiki about?" Use their answer to create `config.md` with title, description, scope, and today's date.
 
-7. Register in `HUB/wikis.json` and update hub `_index.md` topic wiki table. For local wikis, add to the `local_wikis` array.
+7. Register in `HUB/wikis.json` and update hub `_index.md` topic wiki table. Include the isolation flag (`commons: true`, `client: "<name>"`, or `personal: true`) on the entry — see `references/wiki-structure.md` § "Isolation flags". For local wikis, add to the `local_wikis` array (no isolation flag — local wikis are out of scope for the future hook layer).
 
 8. Report what was created and suggest:
    - `/wiki:research "topic" --sources 10` — auto-research to bootstrap
