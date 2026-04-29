@@ -215,10 +215,10 @@ done < <(find "$GOLDEN/wiki" -name "*.md" -not -name "_index.md" -print0)
 echo ""
 echo "--- Log format ---"
 
-if [ -f "$GOLDEN/log.md" ] && grep -q '^## \[' "$GOLDEN/log.md"; then
-  log_pass "log.md has valid entries"
+if [ -f "$GOLDEN/wiki_log.md" ] && grep -q '^## \[' "$GOLDEN/wiki_log.md"; then
+  log_pass "wiki_log.md has valid entries"
 else
-  log_fail "log.md missing or no valid entries" "format violation"
+  log_fail "wiki_log.md missing or no valid entries" "format violation"
 fi
 
 # ─── Defect fixture negative tests ────────────────────────────────

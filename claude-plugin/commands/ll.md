@@ -168,7 +168,7 @@ Do NOT auto-edit CLAUDE.md/AGENTS.md. Present the proposals and let the user app
 ## Stage 7: Log & Report
 
 1. **Update indexes**: Add the raw note to `raw/notes/_index.md` (or invalidate for rebuild)
-2. **Log**: Append to `log.md`:
+2. **Log**: Append to `wiki_log.md`:
    `## [YYYY-MM-DD] ll | "<session topic>" → raw/notes/YYYY-MM-DD-ll-<slug>.md (N lessons, M articles updated)`
 3. **Report**: Show the user:
    - Number of lessons extracted

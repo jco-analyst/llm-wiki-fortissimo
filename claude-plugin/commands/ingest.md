@@ -18,8 +18,8 @@ Read the ingestion protocol at `skills/wiki-manager/references/ingestion.md` and
 
 When `--new-topic` is set, override the standard resolution:
 1. Derive a slug from the topic name: lowercase, hyphens, no special chars, max 40 chars
-2. If HUB doesn't exist, create it (wikis.json + _index.md + log.md + topics/)
-3. Create the new topic wiki at `HUB/topics/<slug>/` following the full init protocol (directory structure, .obsidian/, empty _index.md files, config.md, log.md)
+2. If HUB doesn't exist, create it (wikis.json + _index.md + wiki_log.md + topics/)
+3. Create the new topic wiki at `HUB/topics/<slug>/` following the full init protocol (directory structure, .obsidian/, empty _index.md files, config.md, wiki_log.md)
 4. Register in `HUB/wikis.json` and update hub `_index.md`
 5. Target this new wiki for ingestion
 
@@ -146,6 +146,6 @@ When `--inbox` is set and no `--wiki` was provided, classify items as a batch:
    ---
    ```
 3. Update `raw/{type}/_index.md`, `raw/_index.md`, and master `_index.md` (best-effort — if skipped or interrupted, the next read will rebuild from file frontmatter. See `references/indexing.md` Derived Index Protocol.)
-4. Append to `log.md`: `## [YYYY-MM-DD] ingest | Title (raw/type/slug.md)`
+4. Append to `wiki_log.md`: `## [YYYY-MM-DD] ingest | Title (raw/type/slug.md)`
 7. Report: what was ingested, where saved, detected tags
 8. Check uncompiled source count. If 5+, suggest `/wiki:compile`

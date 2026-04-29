@@ -183,9 +183,9 @@ Audit writes to `.audit/` in the topic wiki root:
 
 - `.audit/scan-results.json` — machine-readable source of truth
 - `.audit/REPORT.md` — human-readable summary
-- `.audit/log.md` — append-only audit activity log
+- `.audit/wiki_log.md` — append-only audit activity log
 
-The topic wiki's main `log.md` also gets an `audit` entry.
+The topic wiki's main `wiki_log.md` also gets an `audit` entry.
 
 ### Recommended JSON shape
 

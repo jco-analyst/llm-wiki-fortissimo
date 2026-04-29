@@ -211,9 +211,9 @@ Human-readable report generated from `scan-results.json`. Format:
 | ... | ... | ... | ... |
 ```
 
-### log.md
+### wiki_log.md
 
-Append-only librarian activity log at `.librarian/log.md`:
+Append-only librarian activity log at `.librarian/wiki_log.md`:
 
 ```
 ## [YYYY-MM-DD] scan | N articles, M stale, K low-quality (passes: staleness, quality)

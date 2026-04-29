@@ -86,12 +86,12 @@ For each affected article:
 
 ### Phase 5: Log the Retraction
 
-Append to `log.md`:
+Append to `wiki_log.md`:
 ```
 ## [YYYY-MM-DD] retract | "{title}" — reason: {reason} → {N} articles affected, {N} claims flagged for review
 ```
 
-Append same to hub `HUB/log.md`.
+Append same to hub `HUB/wiki_log.md`.
 
 ### Phase 6: Optional Recompile (--recompile)
 

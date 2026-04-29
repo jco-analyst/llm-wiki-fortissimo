@@ -81,6 +81,6 @@ When `--retardmax` is set:
    - `output/_index.md` — add row
    - Master `_index.md` — increment output count, add to Recent Changes
 
-5. **Log**: Append to `log.md`: `## [YYYY-MM-DD] output | {type} on {topic} → output/{filename}.md`
+5. **Log**: Append to `wiki_log.md`: `## [YYYY-MM-DD] output | {type} on {topic} → output/{filename}.md`
 
 6. **Report**: What was generated, where saved, which source articles were used.

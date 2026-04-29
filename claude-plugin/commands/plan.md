@@ -214,7 +214,7 @@ Technical specification:
    - `output/_index.md` — add row
    - Master `_index.md` — add to Outputs table and Recent Changes
 
-3. **Log**: Append to `log.md`:
+3. **Log**: Append to `wiki_log.md`:
    `## [YYYY-MM-DD] plan | "{goal}" → output/plan-{slug}-{YYYY-MM-DD}.md (N articles consulted, M decisions, P phases)`
 
 4. **Report**: Tell the user what was generated, where it's saved, and any open questions or suggested follow-ups.

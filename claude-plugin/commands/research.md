@@ -38,8 +38,8 @@ There is no ambient project focus — pass `--project` explicitly when you want 
 
 **When `--new-topic` is set**, override the standard resolution:
 1. Derive a slug from the topic: lowercase, hyphens, no special chars, max 40 chars
-2. If HUB doesn't exist, create it (wikis.json + _index.md + log.md + topics/)
-3. Create the new topic wiki at `HUB/topics/<slug>/` following the full init protocol (directory structure, .obsidian/, empty _index.md files, config.md, log.md)
+2. If HUB doesn't exist, create it (wikis.json + _index.md + wiki_log.md + topics/)
+3. Create the new topic wiki at `HUB/topics/<slug>/` following the full init protocol (directory structure, .obsidian/, empty _index.md files, config.md, wiki_log.md)
 4. Register in `HUB/wikis.json` and update hub `_index.md`
 5. Target this new wiki for all research that follows
 
@@ -154,7 +154,7 @@ Final:   Run /wiki:lint --fix to clean up
 - Subtopics get progressively more specific as rounds continue (broad → narrow → niche)
 - If a round finds no new gaps, switch to `--deep` mode on existing articles to find connections and contradictions
 - If still no gaps after deep mode, research is complete regardless of remaining time — report early completion
-- Each round logs to `log.md` independently
+- Each round logs to `wiki_log.md` independently
 - **Progress-based termination**: After each round, calculate a progress score (0-100). If score ≥ 80 and no high-priority gaps remain, recommend early completion even if time budget remains — more rounds of diminishing returns waste tokens without improving quality.
 - **Low-yield detection**: If a round's progress score is < 40, the round produced little value. Switch strategy: try --deep angles, broaden search terms, or narrow topic focus. Don't keep doing the same thing.
 
@@ -547,8 +547,8 @@ For each high-quality source (up to --sources count, ranked by quality score):
 
 #### Phase 5: Report & Log
 
-1. Append to topic wiki `log.md`: `## [YYYY-MM-DD] research | "topic" → N sources ingested, M articles compiled`
-2. Append to hub `HUB/log.md`: same entry
+1. Append to topic wiki `wiki_log.md`: `## [YYYY-MM-DD] research | "topic" → N sources ingested, M articles compiled`
+2. Append to hub `HUB/wiki_log.md`: same entry
 
 3. Report:
    - **Topic researched**: the query

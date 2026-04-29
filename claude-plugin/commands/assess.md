@@ -144,7 +144,7 @@ generated: YYYY-MM-DD
 1. Save report to `output/`
 2. Update `output/_index.md`
 3. Update master `_index.md`
-4. Append to topic `log.md`: `## [YYYY-MM-DD] assess | {repo-name} → N alignments, N research gaps, N opportunities, N market gaps`
-5. Append to hub `HUB/log.md`
+4. Append to topic `wiki_log.md`: `## [YYYY-MM-DD] assess | {repo-name} → N alignments, N research gaps, N opportunities, N market gaps`
+5. Append to hub `HUB/wiki_log.md`
 
 6. Optionally suggest: specific `/wiki:research` commands for each gap found

@@ -127,9 +127,9 @@ For each escalated item:
 
 1. Write `.audit/scan-results.json` with summary counts, wiki findings, output findings, truth investigations, and provenance state.
 2. Write `.audit/REPORT.md` as the human-readable report.
-3. Append to `.audit/log.md`:
+3. Append to `.audit/wiki_log.md`:
    `## [YYYY-MM-DD] scan | scope=<scope>, outputs=N, drifted=M, escalations=K`
-4. Append to the wiki root `log.md`:
+4. Append to the wiki root `wiki_log.md`:
    `## [YYYY-MM-DD] audit | scope=<scope>, outputs=N, drifted=M, escalations=K`
 
 #### 6. Present results

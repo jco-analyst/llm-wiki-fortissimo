@@ -120,10 +120,10 @@ After all articles are scored:
 
 #### 5. Log and Report
 
-1. Append to `.librarian/log.md`:
+1. Append to `.librarian/wiki_log.md`:
    `## [YYYY-MM-DD] scan | N articles, M stale, K low-quality (passes: staleness, quality)`
 
-2. Append to the wiki's `log.md`:
+2. Append to the wiki's `wiki_log.md`:
    `## [YYYY-MM-DD] librarian | scanned N articles, M stale, K low-quality`
 
 3. Present the summary to the user:

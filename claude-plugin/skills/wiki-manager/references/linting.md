@@ -174,7 +174,7 @@ A `raw/` or `wiki/` file's correct path is a pure function of its frontmatter. M
 **Checks**:
 
 - [ ] For every `.md` file under `raw/` and `wiki/` (excluding `_index.md` and `config.md`), compute the expected directory from frontmatter and compare to the actual directory.
-- [ ] Raw sources at the hub level (not inside a topic wiki) → misplaced. Hub must only contain `wikis.json`, `_index.md`, `log.md`, and `topics/`.
+- [ ] Raw sources at the hub level (not inside a topic wiki) → misplaced. Hub must only contain `wikis.json`, `_index.md`, `wiki_log.md`, and `topics/`.
 - [ ] Content directories (`raw/`, `wiki/`, `output/`, `inbox/`) at the hub level → misplaced. Move contents into a topic wiki or quarantine.
 - [ ] Files with missing or unreadable frontmatter → defer to C2 (frontmatter fix) before placement can be determined.
 - [ ] Out of scope: anything under `output/projects/`. Project-level placement is C8/C9.
@@ -189,8 +189,8 @@ Any file that is not in the canonical allowlist for its location is either a use
 
 | Location | Allowed items |
 |----------|--------------|
-| HUB | `wikis.json`, `_index.md`, `log.md`, `topics/` |
-| Topic wiki root | `_index.md`, `config.md`, `log.md`, `raw/`, `wiki/`, `output/`, `inbox/`, `.obsidian/`, `.librarian/`, `.audit/`, `.research-session.json`, `.thesis-session.json`, `.session-events.jsonl`, `.session-checkpoint.json` |
+| HUB | `wikis.json`, `_index.md`, `wiki_log.md`, `topics/` |
+| Topic wiki root | `_index.md`, `config.md`, `wiki_log.md`, `raw/`, `wiki/`, `output/`, `inbox/`, `.obsidian/`, `.librarian/`, `.audit/`, `.research-session.json`, `.thesis-session.json`, `.session-events.jsonl`, `.session-checkpoint.json` |
 | `raw/` | `_index.md`, `articles/`, `papers/`, `repos/`, `notes/`, `data/` |
 | `wiki/` | `_index.md`, `concepts/`, `topics/`, `references/`, `theses/` |
 | `raw/<type>/` | `_index.md` + `*.md` files with valid frontmatter |

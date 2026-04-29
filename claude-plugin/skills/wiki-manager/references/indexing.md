@@ -53,7 +53,7 @@ When an index is stale:
 
 - Two sessions writing articles simultaneously: both write files, neither corrupts the other
 - Index may be momentarily stale or one rebuild may overwrite another's rebuild — but since both rebuild from the same source files on disk, the result converges to the same correct state
-- `log.md` is append-only with small atomic writes — already safe
+- `wiki_log.md` is append-only with small atomic writes — already safe
 - No locks needed, no stale lock cleanup, no coordination between sessions
 
 ## When to Update Indexes (Best-Effort)

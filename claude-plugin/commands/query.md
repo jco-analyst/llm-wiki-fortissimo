@@ -130,7 +130,7 @@ Context reload for new sessions. Reads persistent state and outputs a briefing s
 1. **Check for interrupted sessions**: Try to read `.research-session.json` and `.thesis-session.json` in the wiki root. If either exists with `status: "in_progress"`, report: topic/thesis, current round, sources so far, last round's gaps or verdict direction.
 2. **Durable provenance fallback**: If no active session file exists, read `.session-checkpoint.json` and the recent tail of `.session-events.jsonl`. Use them to summarize the most recent completed research/audit/output work instead of reporting "nothing active."
 
-3. **Recent activity**: Read `log.md`. Extract the last 10 entries (grep for `^## \[`). Present them as a compact timeline.
+3. **Recent activity**: Read `wiki_log.md`. Extract the last 10 entries (grep for `^## \[`). Present them as a compact timeline.
 
 4. **Wiki stats**: Read `_index.md` — pull total source count, article count, and output count from the stats section.
 
@@ -190,6 +190,6 @@ Context reload for new sessions. Reads persistent state and outputs a briefing s
 
 ### Log
 
-Append to `log.md`: `## [YYYY-MM-DD] query | "question" → answered from N articles (depth)`
+Append to `wiki_log.md`: `## [YYYY-MM-DD] query | "question" → answered from N articles (depth)`
 
 IMPORTANT: Do NOT use information from your training data. Answer ONLY from wiki content. If the wiki doesn't have the answer, say so honestly.

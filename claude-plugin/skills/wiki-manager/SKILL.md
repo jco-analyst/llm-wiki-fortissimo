@@ -133,7 +133,7 @@ See `references/research-infrastructure.md` § Agent Prompt Templates for exampl
 
 ## Activity Log
 
-Every wiki operation appends to `log.md` in the wiki root. Format: `## [YYYY-MM-DD] operation | Description`. See [references/wiki-structure.md](references/wiki-structure.md) for full format. Never edit or delete existing log entries — append only.
+Every wiki operation appends to `wiki_log.md` in the wiki root. Format: `## [YYYY-MM-DD] operation | Description`. See [references/wiki-structure.md](references/wiki-structure.md) for full format. Never edit or delete existing log entries — append only.
 
 ## Confidence Scoring
 
@@ -162,7 +162,7 @@ Automatically run a quick structural check when any of these triggers occur:
 
 ### Quick Structure Check (lightweight, runs inline — not a full lint)
 
-1. **Hub integrity**: The hub (HUB) should ONLY contain `wikis.json`, `_index.md`, `log.md`, and `topics/`. If `raw/`, `wiki/`, `output/`, `inbox/`, or `config.md` exist at the hub level → **warn, do not delete**. These may hold user data from an older wiki layout. Suggest `/wiki:lint --fix`, which will move contents to the appropriate topic wiki or quarantine to `inbox/.unknown/` per C11/C12 in `references/linting.md`.
+1. **Hub integrity**: The hub (HUB) should ONLY contain `wikis.json`, `_index.md`, `wiki_log.md`, and `topics/`. If `raw/`, `wiki/`, `output/`, `inbox/`, or `config.md` exist at the hub level → **warn, do not delete**. These may hold user data from an older wiki layout. Suggest `/wiki:lint --fix`, which will move contents to the appropriate topic wiki or quarantine to `inbox/.unknown/` per C11/C12 in `references/linting.md`.
 
 2. **Index freshness**: For the active topic wiki, compare actual file count in `wiki/concepts/`, `wiki/topics/`, `wiki/references/` against the rows in their `_index.md`. If mismatched → auto-fix by adding missing entries or removing dead ones.
 
@@ -172,7 +172,7 @@ Automatically run a quick structural check when any of these triggers occur:
 
 5. **wikis.json sync**: Check that all topic sub-wikis under `HUB/topics/` are registered in `wikis.json`. If a directory exists but isn't registered → add it. If registered but directory is missing → remove the entry.
 
-6. **Log existence**: Verify `log.md` exists in the active wiki and at the hub. If missing → create it.
+6. **Log existence**: Verify `wiki_log.md` exists in the active wiki and at the hub. If missing → create it.
 
 ### Behavior
 
@@ -186,7 +186,7 @@ Automatically run a quick structural check when any of these triggers occur:
 Multiple Claude Code sessions can safely read and write to the same wiki simultaneously. No locks are needed.
 
 - **Indexes** are derived from the actual files on disk. If two sessions write articles at the same time, the next read rebuilds the index from whatever files exist. Both rebuilds converge to the same correct result.
-- **log.md** is append-only with small atomic writes. Concurrent appends are safe.
+- **wiki_log.md** is append-only with small atomic writes. Concurrent appends are safe.
 - **Article/source files** are written independently. Two sessions creating different files never conflict. Two sessions editing the same file is unlikely and handled by last-write-wins (acceptable for a wiki — the content is always rebuildable from raw sources).
 
 See [references/indexing.md](references/indexing.md) for the Derived Index Protocol.

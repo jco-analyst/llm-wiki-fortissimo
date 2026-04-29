@@ -102,8 +102,8 @@ On selection, run the full refresh protocol for each selected article.
 
 After refreshing:
 - Update each article's `verified` frontmatter to today
-- Append to `log.md`: `## [YYYY-MM-DD] refresh | N articles checked, M updated, K flagged, J retracted`
-- Append same to hub `log.md`
+- Append to `wiki_log.md`: `## [YYYY-MM-DD] refresh | N articles checked, M updated, K flagged, J retracted`
+- Append same to hub `wiki_log.md`
 
 ### Scheduled Refresh
 

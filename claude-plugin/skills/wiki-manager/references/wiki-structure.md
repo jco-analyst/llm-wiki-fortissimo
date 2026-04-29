@@ -10,7 +10,7 @@ The hub is lightweight — it has NO content directories. It only tracks topic w
 HUB/                               # resolved from ~/.config/llm-wiki/config.json
 ├── wikis.json                     # Registry of all topic wikis
 ├── _index.md                      # Lists topic wikis with stats
-├── log.md                         # Global activity log
+├── wiki_log.md                         # Global activity log
 └── topics/                        # Each topic is a full wiki
     ├── dementia/
     ├── quantum-computing/
@@ -32,7 +32,7 @@ HUB/topics/<name>/
 │   ├── REPORT.md
 │   └── scan-results.json
 ├── config.md                      # Title, scope, conventions
-├── log.md                         # Topic-level activity log
+├── wiki_log.md                         # Topic-level activity log
 ├── inbox/                         # Drop zone for this topic
 │   └── .processed/
 ├── raw/                           # Immutable source material
@@ -179,7 +179,7 @@ Additionally includes:
 - [Outputs](output/_index.md)
 ```
 
-## log.md Format
+## wiki_log.md Format
 
 Append-only chronological activity log. Every wiki operation appends an entry. Never edit or delete existing entries. **Always open for append, never read-modify-write** — this makes concurrent writes safe (lines from multiple sessions interleave without corruption). Format is grep-friendly:
 
@@ -200,7 +200,7 @@ Each entry: `## [YYYY-MM-DD] operation | Description`
 
 Operations: `init`, `ingest`, `compile`, `query`, `lint`, `research`, `output`, `refresh`, `librarian`, `audit`, `plan`, `project`, `ll`, `assess`
 
-Useful for: `grep "^## \[" log.md | tail -10` to see recent activity.
+Useful for: `grep "^## \[" wiki_log.md | tail -10` to see recent activity.
 
 ## config.md Format
 

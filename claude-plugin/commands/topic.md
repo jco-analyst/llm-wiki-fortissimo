@@ -86,7 +86,7 @@ Exactly one must be chosen.
 
 5. Create empty `_index.md` in every directory following the format in `references/wiki-structure.md`. Use today's date. Set all counts to 0.
 
-6. Create per-topic `log.md` with the initial entry:
+6. Create per-topic `wiki_log.md` with the initial entry:
    ```
    # Wiki Activity Log
 
@@ -99,7 +99,7 @@ Exactly one must be chosen.
 
 9. Update `<HUB>/_index.md` topic table to list the new topic with its description and isolation flag.
 
-10. Append to `<HUB>/log.md` (workspace-level activity log):
+10. Append to `<HUB>/wiki_log.md` (workspace-level activity log):
     ```
     ## [YYYY-MM-DD] topic | <name> created (<flag>)
     ```

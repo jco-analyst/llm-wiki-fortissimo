@@ -79,10 +79,10 @@ Pause for confirmation. If the user provided `<workspace-path>` in arguments, us
 
    ## Recent Activity
 
-   See `log.md`.
+   See `wiki_log.md`.
    ```
 
-6. Write `<HUB>/log.md` with the initial entry:
+6. Write `<HUB>/wiki_log.md` with the initial entry:
    ```
    # Wiki Activity Log
 
@@ -107,13 +107,13 @@ Pause for confirmation. If the user provided `<workspace-path>` in arguments, us
    >
    > **`output/`** — generated artifacts: summaries, reports, study guides, deliverables. Each project lives at `output/projects/<slug>/` with a `WHY.md` stating the goal. Outputs cite wiki articles, not raw sources directly — so an output's freshness inherits from the articles it cites.
    >
-   > Plus per-topic infrastructure: `inbox/` (drop zone — files dropped here get picked up by `/wiki:ingest --inbox`), `config.md` (topic title, scope, conventions), `log.md` (per-topic activity log), `.obsidian/` (Obsidian vault config).
+   > Plus per-topic infrastructure: `inbox/` (drop zone — files dropped here get picked up by `/wiki:ingest --inbox`), `config.md` (topic title, scope, conventions), `wiki_log.md` (per-topic activity log), `.obsidian/` (Obsidian vault config).
    >
    > ### The operation lifecycle
    >
    > Once you have a topic, knowledge flows through it in stages. The first four are how knowledge gets in, gets synthesized, gets used, and gets captured. The last three are maintenance.
    >
-   > 1. **`/wiki:ingest <url|file|text>`** — brings external material in. The agent fetches the URL (with fallbacks for X.com, paywalls, dead links), assigns a date-prefixed slug for the filename, fills in frontmatter, appends to `log.md`. Idempotent — re-ingesting an already-known URL says "already have it." Sources go to `raw/<type>/` and are never touched after.
+   > 1. **`/wiki:ingest <url|file|text>`** — brings external material in. The agent fetches the URL (with fallbacks for X.com, paywalls, dead links), assigns a date-prefixed slug for the filename, fills in frontmatter, appends to `wiki_log.md`. Idempotent — re-ingesting an already-known URL says "already have it." Sources go to `raw/<type>/` and are never touched after.
    >
    > 2. **`/wiki:compile`** — reads unprocessed sources (or a flagged subset), synthesizes them into wiki articles. Decides whether to create a new article or update an existing one. Sets `confidence:` (Confirmed / Stated / Inferred) based on how many sources agree. Sets `decay_class:` (fast / med / slow) based on subject volatility. Writes dual-link cross-references (Obsidian-style `[[wikilink]]` plus relative markdown path) so both Obsidian and the agent can navigate. Re-runnable — running compile after each ingest is fine; running it after several ingests batches the work.
    >

@@ -92,4 +92,4 @@ When listing a recommended fix priority, describe the action in human terms:
 - Good: `Migrate 3 legacy project manifests (_project.md → WHY.md)`
 - Bad: `C8c — migrate 3 _project.md → WHY.md`
 
-Update master `_index.md` with "Last lint" date. Append to `log.md`: `## [YYYY-MM-DD] lint | N checks, N critical, N warnings, N suggestions, N candidates, N auto-fixed`
+Update master `_index.md` with "Last lint" date. Append to `wiki_log.md`: `## [YYYY-MM-DD] lint | N checks, N critical, N warnings, N suggestions, N candidates, N auto-fixed`
