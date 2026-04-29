@@ -1,9 +1,9 @@
 {
   "name": "wiki",
-  "description": "LLM-compiled knowledge base. Natural language routing, truth-seeking audits, session resume, concurrent-safe derived indexes, topic-isolated wikis, parallel multi-agent research, thesis-driven investigation, repo assessment, Obsidian dual-linking, retardmax mode, and --min-time sustained research.",
+  "description": "HORDE fork of nvk/llm-wiki — LLM-compiled knowledge base customized for the Fortissimo AI OS Reference Corpus pillar. Workspace sentinel resolution, wikis.json isolation flags (commons/client/personal), Fortissimo frontmatter (pillar/source_provenance/em_refs/supersedes) on top of nvk's natural language routing, truth-seeking audits, session resume, concurrent-safe derived indexes, topic-isolated wikis, parallel multi-agent research, thesis-driven investigation, repo assessment, Obsidian dual-linking.",
   "version": "0.5.1",
   "author": {
-    "name": "nvk"
+    "name": "jco-analyst (HORDE fork of nvk)"
   },
   "license": "MIT",
   "keywords": [
@@ -16,6 +16,9 @@
     "obsidian",
     "karpathy",
     "audit",
-    "librarian"
+    "librarian",
+    "fortissimo",
+    "horde",
+    "grc"
   ]
 }

@@ -1,18 +1,19 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "llm-wiki",
+  "name": "llm-wiki-fortissimo",
   "version": "0.5.0",
-  "description": "LLM-compiled knowledge base plugin. Natural language routing, truth-seeking audits, session resume, concurrent-safe indexes, topic-isolated wikis, parallel multi-agent research, thesis mode (--mode thesis), repo assessment, Obsidian dual-linking, lint-as-migration, retardmax mode, and --min-time sustained research.",
+  "description": "HORDE fork of nvk/llm-wiki — LLM-compiled knowledge base customized for the Fortissimo AI OS Reference Corpus pillar. Adds workspace sentinel resolution (.fortissimo-vault.json), wikis.json isolation flags (commons/client/personal), and Fortissimo frontmatter fields (pillar/source_provenance/em_refs/supersedes) on top of nvk's algorithms and topology.",
   "owner": {
-    "name": "nvk"
+    "name": "jco-analyst",
+    "url": "https://github.com/jco-analyst/llm-wiki-fortissimo"
   },
   "plugins": [
     {
       "name": "wiki",
-      "description": "LLM-compiled knowledge base. Commands: /wiki (natural language router + init/status), /wiki:ingest, /wiki:compile, /wiki:query (quick/standard/deep/--resume), /wiki:research (5-10 parallel agents, --new-topic, --min-time, --mode thesis), /wiki:audit, /wiki:librarian, /wiki:assess, /wiki:plan, /wiki:lint, /wiki:output, /wiki:retract, /wiki:project.",
+      "description": "HORDE fork of nvk/llm-wiki. LLM-compiled knowledge base. Commands: /wiki (natural language router + init/status), /wiki:ingest, /wiki:compile, /wiki:query (quick/standard/deep/--resume), /wiki:research (5-10 parallel agents, --new-topic, --min-time, --mode thesis), /wiki:audit, /wiki:librarian, /wiki:assess, /wiki:plan, /wiki:lint, /wiki:output, /wiki:retract, /wiki:project. HORDE additions: workspace sentinel, isolation flags, Fortissimo frontmatter.",
       "version": "0.5.0",
       "author": {
-        "name": "nvk"
+        "name": "jco-analyst (HORDE fork of nvk)"
       },
       "source": "./claude-plugin",
       "category": "productivity"
