@@ -40,17 +40,16 @@ Exactly one must be chosen. The flag is recorded in `wikis.json` for the future 
 
    > **Setting up your Fortissimo wiki workspace.**
    >
-   > A workspace is a single root directory holding all your topic wikis plus shared metadata. Once it exists, every `/wiki:` command run from anywhere inside the workspace finds it automatically (via the `.fortissimo-vault.json` sentinel — written next).
+   > A workspace is a single root directory holding all your topic wikis plus shared metadata. Once it exists, every `/wiki:` command run from anywhere inside the workspace finds the right hub automatically — no environment variables, no config flags, no daily fiddling.
    >
    > About to create:
    > - **`<HUB>/`** — workspace root (where you tell me)
-   > - **`<HUB>/.fortissimo-vault.json`** — sentinel + workspace metadata (workspace_name, owner, em_root, topics_root)
-   > - **`<HUB>/wikis.json`** — registry of your topic wikis (with isolation flags: commons / client / personal)
-   > - **`<HUB>/_index.md`** + **`<HUB>/log.md`** — hub-level navigation and append-only activity log
-   > - **`<HUB>/topics/`** — directory holding each topic wiki
-   > - **`<HUB>/topics/<your-first-topic>/`** — your first topic, with `raw/` (immutable sources), `wiki/` (compiled articles), `output/` (deliverables), `inbox/` (drop zone)
+   > - **`<HUB>/topics/`** — directory holding each topic's full wiki structure
+   > - **`<HUB>/topics/<your-first-topic>/`** — your first topic. Three content layers: `raw/` (immutable sources), `wiki/` (compiled articles), `output/` (deliverables). Plus an `inbox/` drop zone, a per-topic `config.md`, and a per-topic `log.md`.
    >
-   > **Engagement Memory note:** if you keep an EM v1.5 store at `<HUB>/em/`, the wiki never touches it. Cross-cite EM entries from wiki articles via the `em_refs:` frontmatter field. EM stays owned by EM; the wiki stays owned by the wiki.
+   > A few small metadata files land at the workspace root to track your topic registry, isolation flags (`commons` / `client` / `personal`), and an append-only activity log across all topics.
+   >
+   > **Engagement Memory note:** if you keep an EM v1.5 store at `<HUB>/em/`, the wiki never touches it. The wiki and EM are separate stores with separate lifecycles — the post-init orientation explains how they cross-cite.
    >
    > Continue?
 
@@ -133,33 +132,84 @@ Exactly one must be chosen. The flag is recorded in `wikis.json` for the future 
 
    > **Workspace ready** at `<HUB>/`.
    >
-   > **The three core operations** (Karpathy pattern):
-   > - `/wiki:ingest <url|file|text>` — add a source. Source goes to `raw/<type>/` immutably. Never edited after.
-   > - `/wiki:compile` — synthesize ingested sources into wiki articles under `wiki/{concepts,topics,references,theses}/`. Re-runnable — articles update as sources accumulate.
-   > - `/wiki:query "<question>"` — ask a question, get an answer with citations back to source material.
+   > ### How the wiki is laid out
    >
-   > **Topic types** (set the isolation flag at init time, recorded in `wikis.json`):
-   > - `commons` — generally-applicable knowledge (frameworks, methodology, standards). Visible to every session.
-   > - `client: "<name>"` — engagement-specific knowledge (e.g., `client: "uline"`). Designed to stay isolated from other engagements when the future hook layer ships.
-   > - `personal` — your own research, learning, notes.
+   > Every topic wiki has three content layers, each with a clear role:
    >
-   > **Cross-topic peek** — querying from inside one topic surfaces relevant material from sibling topics too. That's the whole feature: connections compounding across knowledge areas (cybersecurity frameworks ↔ GRC methodology ↔ client work ↔ personal research).
+   > **`raw/`** — immutable source material. When you ingest a URL, file, or pasted text, the content lands here verbatim with frontmatter (title, source URL, ingest date, type, summary). Sources are NEVER edited after ingestion — that's what makes them reproducible. Subdirectories sort by source kind: `articles/`, `papers/`, `repos/`, `notes/`, `data/`.
    >
-   > **Frontmatter cross-citation** — wiki articles can carry `pillar:`, `em_refs: [FACT-PRO-...]`, `source_provenance:` (chat URLs / extraction context), and `supersedes:` / `superseded_by:` for version handoffs. All optional, all additive.
+   > **`wiki/`** — synthesized articles compiled from sources. These ARE edited — articles evolve as more sources accumulate. Each article carries a `sources:` frontmatter list naming the raw files it was compiled from, so you can always trace a claim back to its origin. Subdirectories by article kind: `concepts/` (foundational explanations), `topics/` (broader syntheses), `references/` (factual lookup), `theses/` (claim-driven investigations).
    >
-   > **Beyond the core ops:**
-   > - `/wiki:librarian` — scan article quality, flag stale entries (uses freshness scoring scaled by `decay_class`)
-   > - `/wiki:lint` — structural integrity check (15 rules: dead links, missing indexes, orphan sources, supersession chains)
-   > - `/wiki:refresh` — re-verify aging articles against current sources
-   > - `/wiki:research <topic> --sources 10` — parallel-agent web research, auto-ingest results
-   > - `/wiki:audit` — truth-seeking audit of an output artifact, follows the citation chain
-   > - `/wiki:project new <slug> "<goal>"` — start a deliverable folder (with `WHY.md`)
+   > **`output/`** — generated artifacts: summaries, reports, study guides, deliverables. Each project lives at `output/projects/<slug>/` with a `WHY.md` stating the goal. Outputs cite wiki articles, not raw sources directly — so an output's freshness inherits from the articles it cites.
    >
-   > **Adding more topics later:**
+   > Plus per-topic infrastructure: `inbox/` (drop zone — files dropped here get picked up by `/wiki:ingest --inbox`), `config.md` (topic title, scope, conventions), `log.md` (per-topic activity log), `.obsidian/` (Obsidian vault config).
+   >
+   > ### The operation lifecycle
+   >
+   > Knowledge flows through the wiki in stages:
+   >
+   > 1. **`/wiki:ingest <url|file|text>`** — saves a source. The agent fetches the URL (with fallbacks for X.com, paywalls, dead links), assigns a date-prefixed slug for the filename, fills in frontmatter, appends to `log.md`. Idempotent — re-ingesting an already-known URL says "already have it." Sources go to `raw/<type>/` and are never touched after.
+   >
+   > 2. **`/wiki:compile`** — reads unprocessed sources (or a flagged subset), synthesizes them into wiki articles. Decides whether to create a new article or update an existing one. Sets `confidence:` (Confirmed / Stated / Inferred) based on how many sources agree. Sets `decay_class:` (fast / med / slow) based on subject volatility. Writes dual-link cross-references (Obsidian-style `[[wikilink]]` plus relative markdown path) so both Obsidian and the agent can navigate. Re-runnable — running compile after each ingest is fine; running it after several ingests batches the work.
+   >
+   > 3. **`/wiki:query "<question>"`** — answers from existing wiki articles. Reads articles first; falls back to raw sources only when the article doesn't have enough. Every answer cites the articles plus the underlying sources. Modes: `--quick` (one article, fast), `--standard` (default, multi-article), `--deep` (multi-article synthesis with reasoning trace), `--resume` (pick up an interrupted session).
+   >
+   > 4. **`/wiki:librarian`** — quality scan. Computes a freshness score (0-100) for each article from four dimensions: how old are the sources, when did a human last verify (`verified:`), when was the article last recompiled (`updated:`), do all sources still resolve. Each dimension's decay curve is scaled by the article's `decay_class` — fast articles age quickly (regulations, threat intel), slow articles barely age (foundational concepts, math). Articles below threshold (default 70 in `config.md`) land in a `REPORT.md` with suggested next steps.
+   >
+   > 5. **`/wiki:lint`** — structural integrity check. Fifteen rules: dead links, missing indexes, stale indexes (file count vs index count drift), orphan sources (in `raw/` but not cited), duplicate tags, mis-placed files, broken supersession chains, missing required frontmatter fields. Lint is cheap — run it freely after compiles and before commits.
+   >
+   > 6. **`/wiki:refresh <article>`** — when sources for an article have aged past their decay curve, re-verify the article's claims against current versions of those sources. Updates `verified:` after the agent confirms the claims still hold. Use this when `librarian` flags an article you actually want to keep current.
+   >
+   > ### Topic types and isolation
+   >
+   > Each topic wiki carries an isolation flag (set at init, recorded in `wikis.json`):
+   > - **`commons`** — generally-applicable knowledge: frameworks, methodology, standards. Not specific to any one engagement.
+   > - **`client: "<name>"`** — engagement-specific knowledge. Tagged with the client name (e.g., `client: "uline"`).
+   > - **`personal`** — your own research, learning, notes — separate from any client work.
+   >
+   > The flag is documentation today. Tomorrow, when a second engagement arrives, a hook layer reads these flags to keep client material from leaking across engagements automatically. Until then: be deliberate about which topic each ingest lands in. A NIST CSF document goes in `cybersecurity-frameworks/` (commons), not in `uline/` (client) — that way both engagements benefit from the framework analysis without duplicating it.
+   >
+   > ### Wiki article frontmatter
+   >
+   > Every wiki article has YAML frontmatter that drives tooling:
+   >
+   > - `category:` — concept | topic | reference | thesis
+   > - `sources:` — list of `raw/` files this article was compiled from
+   > - `confidence:` — Confirmed (multiple agreeing sources or peer-reviewed) | Stated (single credible source) | Inferred (derived or extrapolated)
+   > - `decay_class:` — fast (regulations, vendor specs, threat intel) | med (frameworks, best practices) | slow (foundational concepts, math, principles)
+   > - `verified:` — date a human last confirmed accuracy
+   > - `tags:` — lowercase, hyphenated, specific (`transformer-architecture` not `ai`)
+   > - `aliases:` — alternate names so Obsidian and the agent find the article via variant search terms
+   >
+   > Fortissimo additions (all optional, all additive — articles without them stay valid):
+   > - `pillar:` — `people_org` | `process_workflows` | `technology` | `third_party` (cross-cite Engagement Memory entries)
+   > - `em_refs:` — list of EM entry IDs this article rests on (e.g., `[FACT-PRO-2025-001, DEC-TEC-2026-003]`)
+   > - `source_provenance:` — `chat_url:` + `date:` + `extraction:` for sources reconstructed from conversations or interview transcripts
+   > - `supersedes:` / `superseded_by:` — cross-version handoff (e.g., NIST CSF 2.0 → 3.0). The superseded article stays as the historical record.
+   >
+   > ### Engagement Memory coexistence
+   >
+   > If you keep an EM v1.5 store at `<HUB>/em/`, the wiki never touches it. The two stores serve different roles:
+   > - **EM** — your engagement memory: current state, decisions in flight, contextual facts, demoted by capacity tier (Hot / Warm / Cold / Frozen).
+   > - **Wiki** — your reference corpus: durable knowledge, multi-source articles, freshness scored by `decay_class`.
+   >
+   > Wiki articles cross-cite EM entries via `em_refs:`. EM stays owned by EM; the wiki stays owned by the wiki. Different stores, different lifecycles, linked by ID.
+   >
+   > ### Beyond the core ops
+   >
+   > - **`/wiki:research <topic> --sources 10`** — parallel-agent web research, auto-ingest results. Use when you want to bootstrap a topic from scratch.
+   > - **`/wiki:audit`** — truth-seeking audit of an output artifact. Follows the citation chain from output → wiki article → raw source, flags drift.
+   > - **`/wiki:project new <slug> "<goal>"`** — start a deliverable folder with a `WHY.md`. Subsequent commands run inside the project context.
+   > - **`/wiki:retract <source>`** — pull a source back out (removes it from `raw/`, marks dependent articles for re-compilation).
+   > - **`/wiki:ll <topic>`** — extract lessons-learned from a session into a structured note.
+   >
+   > ### Adding more topics
+   >
    > - `/wiki init nist-csf-3 --commons` — another commons topic
    > - `/wiki init <client-name> --client <client-name>` — a new client engagement
+   > - `/wiki init learning-rust --personal` — personal research
    >
-   > Type `/wiki` anytime for status. Type `/wiki <natural language>` to let me route automatically (e.g., `/wiki "what does NIST CSF say about supply chain risk"` → query).
+   > Type `/wiki` anytime for status. Type `/wiki <natural language>` to route automatically (e.g., `/wiki "what does NIST CSF say about supply chain risk"` → query).
 
    **Subsequent-init suggestion (when HUB already existed before this invocation).** Show the brief version:
    - `/wiki:research "topic" --sources 10` — auto-research to bootstrap
