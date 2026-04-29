@@ -146,19 +146,21 @@ Exactly one must be chosen. The flag is recorded in `wikis.json` for the future 
    >
    > ### The operation lifecycle
    >
-   > Knowledge flows through the wiki in stages:
+   > Knowledge flows through the wiki in stages. The first four are how knowledge gets in, gets synthesized, gets used, and gets captured. The last three are maintenance.
    >
-   > 1. **`/wiki:ingest <url|file|text>`** — saves a source. The agent fetches the URL (with fallbacks for X.com, paywalls, dead links), assigns a date-prefixed slug for the filename, fills in frontmatter, appends to `log.md`. Idempotent — re-ingesting an already-known URL says "already have it." Sources go to `raw/<type>/` and are never touched after.
+   > 1. **`/wiki:ingest <url|file|text>`** — brings external material in. The agent fetches the URL (with fallbacks for X.com, paywalls, dead links), assigns a date-prefixed slug for the filename, fills in frontmatter, appends to `log.md`. Idempotent — re-ingesting an already-known URL says "already have it." Sources go to `raw/<type>/` and are never touched after.
    >
    > 2. **`/wiki:compile`** — reads unprocessed sources (or a flagged subset), synthesizes them into wiki articles. Decides whether to create a new article or update an existing one. Sets `confidence:` (Confirmed / Stated / Inferred) based on how many sources agree. Sets `decay_class:` (fast / med / slow) based on subject volatility. Writes dual-link cross-references (Obsidian-style `[[wikilink]]` plus relative markdown path) so both Obsidian and the agent can navigate. Re-runnable — running compile after each ingest is fine; running it after several ingests batches the work.
    >
    > 3. **`/wiki:query "<question>"`** — answers from existing wiki articles. Reads articles first; falls back to raw sources only when the article doesn't have enough. Every answer cites the articles plus the underlying sources. Modes: `--quick` (one article, fast), `--standard` (default, multi-article), `--deep` (multi-article synthesis with reasoning trace), `--resume` (pick up an interrupted session).
    >
-   > 4. **`/wiki:librarian`** — quality scan. Computes a freshness score (0-100) for each article from four dimensions: how old are the sources, when did a human last verify (`verified:`), when was the article last recompiled (`updated:`), do all sources still resolve. Each dimension's decay curve is scaled by the article's `decay_class` — fast articles age quickly (regulations, threat intel), slow articles barely age (foundational concepts, math). Articles below threshold (default 70 in `config.md`) land in a `REPORT.md` with suggested next steps.
+   > 4. **`/wiki:ll [topic-hint]`** — captures lessons-learned from the current session into the wiki. While `ingest` brings external material in (URLs, files), `ll` brings *internal* session knowledge in: error→fix patterns, user corrections, surprising discoveries, configuration changes, gotchas. The agent scans the conversation, distills the takeaways, and writes them as wiki articles with full frontmatter (sources, confidence, decay_class, tags) into the right `wiki/{concepts,topics}/` subdirectory. This is how working knowledge becomes reference material — particularly valuable for moving methodology from a `client:` topic into a `commons:` topic so it carries forward to the next engagement. Pass `--dry-run` to preview without writing; pass `--rules` to also suggest workspace `CLAUDE.md` rule additions.
    >
-   > 5. **`/wiki:lint`** — structural integrity check. Fifteen rules: dead links, missing indexes, stale indexes (file count vs index count drift), orphan sources (in `raw/` but not cited), duplicate tags, mis-placed files, broken supersession chains, missing required frontmatter fields. Lint is cheap — run it freely after compiles and before commits.
+   > 5. **`/wiki:librarian`** — quality scan. Computes a freshness score (0-100) for each article from four dimensions: how old are the sources, when did a human last verify (`verified:`), when was the article last recompiled (`updated:`), do all sources still resolve. Each dimension's decay curve is scaled by the article's `decay_class` — fast articles age quickly (regulations, threat intel), slow articles barely age (foundational concepts, math). Articles below threshold (default 70 in `config.md`) land in a `REPORT.md` with suggested next steps.
    >
-   > 6. **`/wiki:refresh <article>`** — when sources for an article have aged past their decay curve, re-verify the article's claims against current versions of those sources. Updates `verified:` after the agent confirms the claims still hold. Use this when `librarian` flags an article you actually want to keep current.
+   > 6. **`/wiki:lint`** — structural integrity check. Fifteen rules: dead links, missing indexes, stale indexes (file count vs index count drift), orphan sources (in `raw/` but not cited), duplicate tags, mis-placed files, broken supersession chains, missing required frontmatter fields. Lint is cheap — run it freely after compiles and before commits.
+   >
+   > 7. **`/wiki:refresh <article>`** — when sources for an article have aged past their decay curve, re-verify the article's claims against current versions of those sources. Updates `verified:` after the agent confirms the claims still hold. Use this when `librarian` flags an article you actually want to keep current.
    >
    > ### Topic types and isolation
    >
@@ -201,7 +203,6 @@ Exactly one must be chosen. The flag is recorded in `wikis.json` for the future 
    > - **`/wiki:audit`** — truth-seeking audit of an output artifact. Follows the citation chain from output → wiki article → raw source, flags drift.
    > - **`/wiki:project new <slug> "<goal>"`** — start a deliverable folder with a `WHY.md`. Subsequent commands run inside the project context.
    > - **`/wiki:retract <source>`** — pull a source back out (removes it from `raw/`, marks dependent articles for re-compilation).
-   > - **`/wiki:ll <topic>`** — extract lessons-learned from a session into a structured note.
    >
    > ### Adding more topics
    >
