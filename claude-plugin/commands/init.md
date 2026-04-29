@@ -97,6 +97,70 @@ Pause for confirmation. If the user provided `<workspace-path>` in arguments, us
 
    > **Workspace ready** at `<HUB>/`.
    >
+   > ### Your first session: walkthrough
+   >
+   > Here's what a typical first session looks like, end-to-end.
+   >
+   > **Step 1: create your first topic.** Topics are how the wiki organizes knowledge. For your first, pick a focused area — a framework you reference often, a client engagement, or a personal learning project.
+   >
+   > ```
+   > /wiki:topic cybersecurity-frameworks --commons
+   > ```
+   >
+   > The plugin will ask what the topic is about — answer with a 1-2 sentence description (e.g., "NIST CSF, MITRE ATT&CK, ISO 27001, threat models, framework crosswalks").
+   >
+   > **Step 2: add some source material.** Once the topic exists, ingest URLs, files, or pasted text:
+   >
+   > ```
+   > /wiki:ingest https://csrc.nist.gov/pubs/cswp/29/final --wiki cybersecurity-frameworks
+   > /wiki:ingest ~/Downloads/nist-csf-2.0.pdf --wiki cybersecurity-frameworks
+   > ```
+   >
+   > Each ingest fetches/copies the source into `topics/cybersecurity-frameworks/raw/<type>/`, fills in frontmatter, and logs the operation. Sources become immutable once ingested.
+   >
+   > **Step 3: compile sources into articles.** This is where synthesis happens — the agent reads your sources and writes synthesized wiki articles with full frontmatter and citations:
+   >
+   > ```
+   > /wiki:compile --wiki cybersecurity-frameworks
+   > ```
+   >
+   > Result: articles in `topics/cybersecurity-frameworks/wiki/{concepts,topics,references}/` that cite the raw sources they came from.
+   >
+   > **Step 4: ask the wiki questions.** Once you have articles, query them:
+   >
+   > ```
+   > /wiki:query "what does NIST CSF 2.0 say about supply chain risk?" --wiki cybersecurity-frameworks
+   > ```
+   >
+   > The agent reads the relevant articles (and falls back to raw sources only when the article doesn't have enough), composes an answer, and cites which articles + sources it drew from.
+   >
+   > **Step 5: capture session lessons.** When a session produces non-obvious knowledge — a debugging insight, a methodology refinement, a gotcha — capture it:
+   >
+   > ```
+   > /wiki:ll cybersecurity-frameworks
+   > ```
+   >
+   > The agent scans the conversation, distills the lessons, and writes them as articles. This is how working knowledge becomes reference material.
+   >
+   > **Step 6 (periodic): keep the wiki healthy.** Lint is cheap; librarian is the deeper scan:
+   >
+   > ```
+   > /wiki:lint --wiki cybersecurity-frameworks
+   > /wiki:librarian --wiki cybersecurity-frameworks
+   > ```
+   >
+   > Lint catches broken links and structural drift; librarian flags articles whose freshness has dropped (aged sources, supersession detected).
+   >
+   > **Shortcut: natural-language routing.** If you don't want to remember which command fits, just describe what you want:
+   >
+   > ```
+   > /wiki:wiki "add https://example.com/nist-csf-3.pdf to cybersecurity-frameworks"   → ingest
+   > /wiki:wiki "what does NIST say about supply chain"                                → query
+   > /wiki:wiki "research transformer architecture --sources 10"                       → research
+   > ```
+   >
+   > The reference sections below explain each piece in depth. Skim now, refer back as you build out the wiki.
+   >
    > ### How the wiki is laid out
    >
    > Every topic wiki you create will have three content layers, each with a clear role:
