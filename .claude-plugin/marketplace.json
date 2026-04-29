@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "llm-wiki-fortissimo",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "HORDE fork of nvk/llm-wiki — LLM-compiled knowledge base customized for the Fortissimo AI OS Reference Corpus pillar. Adds workspace sentinel resolution (.fortissimo-vault.json), wikis.json isolation flags (commons/client/personal), and Fortissimo frontmatter fields (pillar/source_provenance/em_refs/supersedes) on top of nvk's algorithms and topology.",
   "owner": {
     "name": "jco-analyst",
@@ -10,8 +10,8 @@
   "plugins": [
     {
       "name": "wiki",
-      "description": "HORDE fork of nvk/llm-wiki. LLM-compiled knowledge base. Commands: /wiki (natural language router + init/status), /wiki:ingest, /wiki:compile, /wiki:query (quick/standard/deep/--resume), /wiki:research (5-10 parallel agents, --new-topic, --min-time, --mode thesis), /wiki:audit, /wiki:librarian, /wiki:assess, /wiki:plan, /wiki:lint, /wiki:output, /wiki:retract, /wiki:project. HORDE additions: workspace sentinel, isolation flags, Fortissimo frontmatter.",
-      "version": "0.5.0",
+      "description": "HORDE fork of nvk/llm-wiki. LLM-compiled knowledge base. Commands: /wiki:init (workspace bootstrap), /wiki:topic (topic creation with isolation flag), /wiki:wiki (natural-language router + status/config), /wiki:ingest, /wiki:compile, /wiki:query (quick/standard/deep/--resume), /wiki:ll (lessons learned), /wiki:research (5-10 parallel agents, --new-topic, --min-time, --mode thesis), /wiki:audit, /wiki:librarian, /wiki:assess, /wiki:plan, /wiki:lint, /wiki:refresh, /wiki:output, /wiki:retract, /wiki:project. HORDE additions: workspace sentinel, isolation flags, Fortissimo frontmatter.",
+      "version": "0.5.1",
       "author": {
         "name": "jco-analyst (HORDE fork of nvk)"
       },
