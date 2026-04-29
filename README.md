@@ -7,9 +7,11 @@
 ╚══════╝╚══════╝╚═╝     ╚═╝     ╚══╝╚══╝ ╚═╝╚═╝  ╚═╝╚═╝
 ```
 
-[github.com/nvk/llm-wiki](https://github.com/nvk/llm-wiki)
+> **HORDE fork (llm-wiki-fortissimo) — Claude Code only.** This is a HORDE fork of [nvk/llm-wiki@v0.5.0](https://github.com/nvk/llm-wiki) customized for the Fortissimo AI OS Reference Corpus pillar. **Codex and OpenCode distribution targets and the portable AGENTS.md protocol have been removed in phase 0.** Sections below referencing `@wiki`, `codex plugin marketplace`, `opencode.json`, or AGENTS.md describe upstream behavior — they do not apply to this fork. See `HORDE-CUSTOMIZATIONS.md` and `CLAUDE.md` for the patch log and dev guide. Upstream README content kept as historical / conceptual reference.
 
-LLM-compiled knowledge bases for any AI agent. Parallel multi-agent research, thesis-driven investigation, source ingestion, wiki compilation, truth-seeking audits, querying, and artifact generation. Ships as a Claude Code plugin, an OpenAI Codex plugin, an OpenCode instruction file, or a portable AGENTS.md for any other LLM agent. Obsidian-compatible.
+[Upstream: github.com/nvk/llm-wiki](https://github.com/nvk/llm-wiki)
+
+LLM-compiled knowledge bases for Claude Code. Parallel multi-agent research, thesis-driven investigation, source ingestion, wiki compilation, truth-seeking audits, querying, and artifact generation. Obsidian-compatible.
 
 ---
 
