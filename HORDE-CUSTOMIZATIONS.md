@@ -4,10 +4,16 @@ This is a HORDE fork of [nvk/llm-wiki](https://github.com/nvk/llm-wiki), customi
 
 ## Branch
 
-- **Upstream tag**: `v0.5.0`
-- **HORDE branch**: `horde/v0.5.0`
+- **Upstream tag**: `v0.5.1` (rebased 2026-04-29 — see Rebase Log below)
+- **HORDE branch**: `horde/v0.5.1`
 - **Fork rationale**: vocabulary alignment with Aziz's existing Engagement Memory v1.5 system, plus workspace-sentinel resolution for multi-engagement isolation prep.
 - **Rebase strategy**: when nvk publishes a new release, `git fetch && git rebase v<new>` and apply this patch log to verify each customization still applies.
+
+## Rebase Log
+
+| Date | From → To | Conflicts resolved | Notes |
+|------|-----------|--------------------|-------|
+| 2026-04-29 | v0.5.0 → v0.5.1 | (a) `plugins/llm-wiki-opencode/`, `plugins/llm-wiki/` modify-vs-delete: kept our deletion (Patch 02 — single-runtime simplification overrides upstream's multi-runtime updates). (b) `claude-plugin/.claude-plugin/plugin.json` version conflict at Patch 06 rebrand: kept HORDE description, took upstream's v0.5.1 bump. (c) `commands/query.md`, `commands/research.md`, `references/research-infrastructure.md` content conflicts at Patch 09 (`log.md → wiki_log.md` rename): took upstream's new durable-provenance content (which moved away from `log.md` references entirely, so our rename had nothing to apply). | Upstream v0.5.1 ships durable session provenance (`.session-events.jsonl` + `.session-checkpoint.json`) — complementary to our Patch 05 article-level `source_provenance:` frontmatter, not duplicative. All 14 HORDE patches replayed cleanly. Tests: 34/34 plugin-validate, 92/92 structural. |
 
 ## Why this fork exists
 
