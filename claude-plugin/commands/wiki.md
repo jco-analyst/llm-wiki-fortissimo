@@ -1,6 +1,6 @@
 ---
-description: "LLM wiki knowledge base — understands natural language. Say what you want (add a URL, ask a question, research a topic, audit an output, resume work) and it routes to the right subcommand. Also handles init, status, and config."
-argument-hint: "[<natural language request>] [init <topic-name> [--local|--commons|--client <name>|--personal]] [config hub-path [<path>]] [--wiki <name>]"
+description: "LLM wiki knowledge base — understands natural language. Say what you want (add a URL, ask a question, research a topic, audit an output, resume work) and it routes to the right subcommand. Also shows status and handles config. For workspace bootstrap use /wiki:init; for topic creation use /wiki:topic."
+argument-hint: "[<natural language request>] [config hub-path [<path>]] [--wiki <name>]"
 allowed-tools: Read, Write, Edit, Glob, Bash(ls:*), Bash(wc:*), Bash(mkdir:*), Bash(date:*), Bash(mv:*)
 ---
 
@@ -9,218 +9,15 @@ allowed-tools: Read, Write, Edit, Glob, Bash(ls:*), Bash(wc:*), Bash(mkdir:*), B
 **Resolve the wiki.** Do NOT search the filesystem or read reference files — follow these steps:
 0. **(HORDE fork)** Walk up from `cwd` looking for `.fortissimo-vault.json`. Stop at first match (or at `$HOME` / filesystem root with no match). If found → HUB = the directory containing the sentinel; read the sentinel for `topics_root` (default `topics`) and `default_topic`; skip to step 3.
 1. If no sentinel, read `$HOME/.config/llm-wiki/config.json`. If it has `resolved_path` → HUB = that value, skip to step 3. If only `hub_path`, expand leading `~` only (not tildes in `com~apple~CloudDocs`), set HUB, write `resolved_path` back, skip to step 3.
-2. If no config → read `$HOME/wiki/_index.md`. If it exists → HUB = `$HOME/wiki`. If nothing found, ask the user where to create the wiki.
+2. If no config → read `$HOME/wiki/_index.md`. If it exists → HUB = `$HOME/wiki`. If nothing found, fall through to the "no wiki exists" section below.
 3. **Wiki location** (first match): `--local` → `.wiki/` in CWD; `--wiki <name>` → `HUB/wikis.json` lookup; CWD has `.wiki/` → use it; else → HUB.
-4. Read `<wiki>/_index.md` if found. Variant: **wiki-neutral** — `wiki.md` is the router, init, and config command, so "wiki missing" is not always an error; the init subcommand creates the wiki, status shows an empty hub gracefully, and the natural-language router explains how to create one.
+4. Read `<wiki>/_index.md` if found. Variant: **wiki-neutral** — `wiki.md` is the router, status, and config command. "Wiki missing" is not always an error: status shows an empty hub gracefully, the natural-language router explains how to create one, and bootstrap is delegated to `/wiki:init` (workspace) and `/wiki:topic` (topic).
 
 You are the llm-wiki knowledge base manager. Read the skill at `skills/wiki-manager/SKILL.md` and structure reference at `skills/wiki-manager/references/wiki-structure.md` for full conventions.
 
 ---
 
-### If $ARGUMENTS contains "init"
-
-Initialize a new wiki. Parse arguments:
-- `init <name>` → create topic wiki at `HUB/topics/<name>/`
-- `init <name> --local` → create local wiki at `.wiki/` in current project
-- `init <name> --commons` → register as commons topic (visible to all sessions; HORDE fork)
-- `init <name> --client <client-name>` → register as client-scoped topic (HORDE fork)
-- `init <name> --personal` → register as the operator's personal topic (HORDE fork)
-- `init` (no name) → ask: "What topic is this for?" Then create the topic wiki with their answer.
-
-**A topic name is always required.** There is no bare global wiki — HUB is only a hub (wikis.json + _index.md + log.md). All content lives in topic sub-wikis.
-
-**Isolation flag (HORDE fork):** if none of `--commons|--client|--personal` is provided, ask the user:
-> Is this topic generally-applicable knowledge (commons), engagement-specific (client), or your personal research (personal)?
-
-Exactly one must be chosen. The flag is recorded in `wikis.json` for the future isolation hook layer. See `references/wiki-structure.md` § "Isolation flags" for the full rule.
-
-**Steps:**
-
-0. **First-run primer (only when HUB doesn't exist).** Before creating anything, show:
-
-   > **Setting up your Fortissimo wiki workspace.**
-   >
-   > A workspace is a single root directory holding all your topic wikis plus shared metadata. Once it exists, every `/wiki:` command run from anywhere inside the workspace finds the right hub automatically — no environment variables, no config flags, no daily fiddling.
-   >
-   > About to create:
-   > - **`<HUB>/`** — workspace root (where you tell me)
-   > - **`<HUB>/topics/`** — directory holding each topic's full wiki structure
-   > - **`<HUB>/topics/<your-first-topic>/`** — your first topic. Three content layers: `raw/` (immutable sources), `wiki/` (compiled articles), `output/` (deliverables). Plus an `inbox/` drop zone, a per-topic `config.md`, and a per-topic `log.md`.
-   >
-   > A few small metadata files land at the workspace root to track your topic registry, isolation flags (`commons` / `client` / `personal`), and an append-only activity log across all topics.
-   >
-   > **Engagement Memory note:** if you keep an EM v1.5 store at `<HUB>/em/`, the wiki never touches it. The wiki and EM are separate stores with separate lifecycles — the post-init orientation explains how they cross-cite.
-   >
-   > Continue?
-
-   Pause for confirmation. Then proceed.
-
-1. If HUB doesn't exist yet, create the hub first:
-   - `HUB/.fortissimo-vault.json` (workspace sentinel — HORDE fork). Ask the user for `workspace_name` (default: directory basename) and `owner`. Write:
-     ```json
-     {
-       "workspace_name": "<answer>",
-       "owner": "<answer>",
-       "created": "YYYY-MM-DD",
-       "em_root": "em",
-       "topics_root": "topics",
-       "default_topic": "<first topic name>"
-     }
-     ```
-   - `HUB/wikis.json` (empty registry)
-   - `HUB/_index.md` (hub index with empty topic wiki table)
-   - `HUB/log.md` (global activity log)
-   - `HUB/topics/` directory (or `HUB/<topics_root>/` if the sentinel's `topics_root` differs from `topics`)
-   - NO `raw/`, `wiki/`, `output/`, `inbox/`, `config.md`, or `.obsidian/` at the hub level. Aziz's Engagement Memory files live at `HUB/em/` (or `HUB/<em_root>/`) and are owned by EM, not the wiki — never create or modify them here.
-
-2. Create the topic wiki directory structure:
-   - `inbox/`, `inbox/.processed/`
-   - `raw/`, `raw/articles/`, `raw/papers/`, `raw/repos/`, `raw/notes/`, `raw/data/`
-   - `wiki/`, `wiki/concepts/`, `wiki/topics/`, `wiki/references/`
-   - `output/`
-   - For local wikis (`--local`): append `.wiki/` to the project's `.gitignore`.
-
-3. Create `.obsidian/` directory with minimal vault config:
-   - `.obsidian/app.json`:
-     ```json
-     {
-       "showFrontmatter": true,
-       "alwaysUpdateLinks": true,
-       "newLinkFormat": "relative",
-       "useMarkdownLinks": false
-     }
-     ```
-   - `.obsidian/appearance.json`:
-     ```json
-     {
-       "accentColor": ""
-     }
-     ```
-   - `.obsidian/graph.json`:
-     ```json
-     {
-       "collapse-filter": false,
-       "search": "",
-       "showTags": true,
-       "showAttachments": false,
-       "showOrphans": true,
-       "collapse-color-groups": false,
-       "collapse-display": false,
-       "showArrow": true,
-       "textFadeMultiplier": 0,
-       "nodeSizeMultiplier": 1,
-       "lineSizeMultiplier": 1
-     }
-     ```
-
-4. Create empty `_index.md` in every directory following the format in `references/wiki-structure.md`. Use today's date. Set all counts to 0.
-
-5. Create `log.md` with initial entry:
-   ```
-   # Wiki Activity Log
-
-   ## [YYYY-MM-DD] init | Wiki initialized
-   ```
-
-6. Ask the user: "What is this wiki about?" Use their answer to create `config.md` with title, description, scope, and today's date.
-
-7. Register in `HUB/wikis.json` and update hub `_index.md` topic wiki table. Include the isolation flag (`commons: true`, `client: "<name>"`, or `personal: true`) on the entry — see `references/wiki-structure.md` § "Isolation flags". For local wikis, add to the `local_wikis` array (no isolation flag — local wikis are out of scope for the future hook layer).
-
-8. Report what was created.
-
-   **First-run orientation (only when HUB was created in this invocation).** Show:
-
-   > **Workspace ready** at `<HUB>/`.
-   >
-   > ### How the wiki is laid out
-   >
-   > Every topic wiki has three content layers, each with a clear role:
-   >
-   > **`raw/`** — immutable source material. When you ingest a URL, file, or pasted text, the content lands here verbatim with frontmatter (title, source URL, ingest date, type, summary). Sources are NEVER edited after ingestion — that's what makes them reproducible. Subdirectories sort by source kind: `articles/`, `papers/`, `repos/`, `notes/`, `data/`.
-   >
-   > **`wiki/`** — synthesized articles compiled from sources. These ARE edited — articles evolve as more sources accumulate. Each article carries a `sources:` frontmatter list naming the raw files it was compiled from, so you can always trace a claim back to its origin. Subdirectories by article kind: `concepts/` (foundational explanations), `topics/` (broader syntheses), `references/` (factual lookup), `theses/` (claim-driven investigations).
-   >
-   > **`output/`** — generated artifacts: summaries, reports, study guides, deliverables. Each project lives at `output/projects/<slug>/` with a `WHY.md` stating the goal. Outputs cite wiki articles, not raw sources directly — so an output's freshness inherits from the articles it cites.
-   >
-   > Plus per-topic infrastructure: `inbox/` (drop zone — files dropped here get picked up by `/wiki:ingest --inbox`), `config.md` (topic title, scope, conventions), `log.md` (per-topic activity log), `.obsidian/` (Obsidian vault config).
-   >
-   > ### The operation lifecycle
-   >
-   > Knowledge flows through the wiki in stages. The first four are how knowledge gets in, gets synthesized, gets used, and gets captured. The last three are maintenance.
-   >
-   > 1. **`/wiki:ingest <url|file|text>`** — brings external material in. The agent fetches the URL (with fallbacks for X.com, paywalls, dead links), assigns a date-prefixed slug for the filename, fills in frontmatter, appends to `log.md`. Idempotent — re-ingesting an already-known URL says "already have it." Sources go to `raw/<type>/` and are never touched after.
-   >
-   > 2. **`/wiki:compile`** — reads unprocessed sources (or a flagged subset), synthesizes them into wiki articles. Decides whether to create a new article or update an existing one. Sets `confidence:` (Confirmed / Stated / Inferred) based on how many sources agree. Sets `decay_class:` (fast / med / slow) based on subject volatility. Writes dual-link cross-references (Obsidian-style `[[wikilink]]` plus relative markdown path) so both Obsidian and the agent can navigate. Re-runnable — running compile after each ingest is fine; running it after several ingests batches the work.
-   >
-   > 3. **`/wiki:query "<question>"`** — answers from existing wiki articles. Reads articles first; falls back to raw sources only when the article doesn't have enough. Every answer cites the articles plus the underlying sources. Modes: `--quick` (one article, fast), `--standard` (default, multi-article), `--deep` (multi-article synthesis with reasoning trace), `--resume` (pick up an interrupted session).
-   >
-   > 4. **`/wiki:ll [topic-hint]`** — captures lessons-learned from the current session into the wiki. While `ingest` brings external material in (URLs, files), `ll` brings *internal* session knowledge in: error→fix patterns, user corrections, surprising discoveries, configuration changes, gotchas. The agent scans the conversation, distills the takeaways, and writes them as wiki articles with full frontmatter (sources, confidence, decay_class, tags) into the right `wiki/{concepts,topics}/` subdirectory. This is how working knowledge becomes reference material — particularly valuable for moving methodology from a `client:` topic into a `commons:` topic so it carries forward to the next engagement. Pass `--dry-run` to preview without writing; pass `--rules` to also suggest workspace `CLAUDE.md` rule additions.
-   >
-   > 5. **`/wiki:librarian`** — quality scan. Computes a freshness score (0-100) for each article from four dimensions: how old are the sources, when did a human last verify (`verified:`), when was the article last recompiled (`updated:`), do all sources still resolve. Each dimension's decay curve is scaled by the article's `decay_class` — fast articles age quickly (regulations, threat intel), slow articles barely age (foundational concepts, math). Articles below threshold (default 70 in `config.md`) land in a `REPORT.md` with suggested next steps.
-   >
-   > 6. **`/wiki:lint`** — structural integrity check. Fifteen rules: dead links, missing indexes, stale indexes (file count vs index count drift), orphan sources (in `raw/` but not cited), duplicate tags, mis-placed files, broken supersession chains, missing required frontmatter fields. Lint is cheap — run it freely after compiles and before commits.
-   >
-   > 7. **`/wiki:refresh <article>`** — when sources for an article have aged past their decay curve, re-verify the article's claims against current versions of those sources. Updates `verified:` after the agent confirms the claims still hold. Use this when `librarian` flags an article you actually want to keep current.
-   >
-   > ### Topic types and isolation
-   >
-   > Each topic wiki carries an isolation flag (set at init, recorded in `wikis.json`):
-   > - **`commons`** — generally-applicable knowledge: frameworks, methodology, standards. Not specific to any one engagement.
-   > - **`client: "<name>"`** — engagement-specific knowledge. Tagged with the client name (e.g., `client: "uline"`).
-   > - **`personal`** — your own research, learning, notes — separate from any client work.
-   >
-   > The flag is documentation today. Tomorrow, when a second engagement arrives, a hook layer reads these flags to keep client material from leaking across engagements automatically. Until then: be deliberate about which topic each ingest lands in. A NIST CSF document goes in `cybersecurity-frameworks/` (commons), not in `uline/` (client) — that way both engagements benefit from the framework analysis without duplicating it.
-   >
-   > ### Wiki article frontmatter
-   >
-   > Every wiki article has YAML frontmatter that drives tooling:
-   >
-   > - `category:` — concept | topic | reference | thesis
-   > - `sources:` — list of `raw/` files this article was compiled from
-   > - `confidence:` — Confirmed (multiple agreeing sources or peer-reviewed) | Stated (single credible source) | Inferred (derived or extrapolated)
-   > - `decay_class:` — fast (regulations, vendor specs, threat intel) | med (frameworks, best practices) | slow (foundational concepts, math, principles)
-   > - `verified:` — date a human last confirmed accuracy
-   > - `tags:` — lowercase, hyphenated, specific (`transformer-architecture` not `ai`)
-   > - `aliases:` — alternate names so Obsidian and the agent find the article via variant search terms
-   >
-   > Fortissimo additions (all optional, all additive — articles without them stay valid):
-   > - `pillar:` — `people_org` | `process_workflows` | `technology` | `third_party` (cross-cite Engagement Memory entries)
-   > - `em_refs:` — list of EM entry IDs this article rests on (e.g., `[FACT-PRO-2025-001, DEC-TEC-2026-003]`)
-   > - `source_provenance:` — `chat_url:` + `date:` + `extraction:` for sources reconstructed from conversations or interview transcripts
-   > - `supersedes:` / `superseded_by:` — cross-version handoff (e.g., NIST CSF 2.0 → 3.0). The superseded article stays as the historical record.
-   >
-   > ### Engagement Memory coexistence
-   >
-   > If you keep an EM v1.5 store at `<HUB>/em/`, the wiki never touches it. The two stores serve different roles:
-   > - **EM** — your engagement memory: current state, decisions in flight, contextual facts, demoted by capacity tier (Hot / Warm / Cold / Frozen).
-   > - **Wiki** — your reference corpus: durable knowledge, multi-source articles, freshness scored by `decay_class`.
-   >
-   > Wiki articles cross-cite EM entries via `em_refs:`. EM stays owned by EM; the wiki stays owned by the wiki. Different stores, different lifecycles, linked by ID.
-   >
-   > ### Beyond the core ops
-   >
-   > - **`/wiki:research <topic> --sources 10`** — parallel-agent web research, auto-ingest results. Use when you want to bootstrap a topic from scratch.
-   > - **`/wiki:audit`** — truth-seeking audit of an output artifact. Follows the citation chain from output → wiki article → raw source, flags drift.
-   > - **`/wiki:project new <slug> "<goal>"`** — start a deliverable folder with a `WHY.md`. Subsequent commands run inside the project context.
-   > - **`/wiki:retract <source>`** — pull a source back out (removes it from `raw/`, marks dependent articles for re-compilation).
-   >
-   > ### Adding more topics
-   >
-   > - `/wiki init nist-csf-3 --commons` — another commons topic
-   > - `/wiki init <client-name> --client <client-name>` — a new client engagement
-   > - `/wiki init learning-rust --personal` — personal research
-   >
-   > Type `/wiki` anytime for status. Type `/wiki <natural language>` to route automatically (e.g., `/wiki "what does NIST CSF say about supply chain risk"` → query).
-
-   **Subsequent-init suggestion (when HUB already existed before this invocation).** Show the brief version:
-   - `/wiki:research "topic" --sources 10` — auto-research to bootstrap
-   - `/wiki:ingest <url|file|text>` — add source material
-   - `/wiki:compile` — compile sources into wiki articles
-   - `/wiki:query <question>` — ask questions
-
----
-
-### If $ARGUMENTS is freeform text (not "init", "config", or empty) and a wiki exists
+### If $ARGUMENTS is freeform text (not "config" or empty) and a wiki exists
 
 The user typed something that isn't a known keyword. Detect their intent and route to the right subcommand.
 
@@ -296,51 +93,21 @@ Show wiki status. Before reading any `_index.md`, stale-check it: count `.md` fi
 
 ---
 
-### If no wiki exists and no "init" argument
+### If no wiki exists
 
-The user is new or hasn't initialized a wiki yet. Instead of dumping a command list, walk them through getting started.
+Resolution prelude found no workspace (no sentinel, no config-pointed hub, no `~/wiki/`). The user hasn't bootstrapped one yet. Show:
 
-**Step 1: Welcome and orient.** Explain what llm-wiki does in one sentence, then ask what they want to research:
-
-> **Welcome to llm-wiki** — a knowledge base that researches topics, ingests sources, and compiles them into articles you can query.
+> **No wiki workspace found.**
 >
-> To get started, what topic would you like to research? For example:
-> - Quantum computing
-> - Nutrition and supplements
-> - Kubernetes deployment patterns
+> A workspace is a single directory holding all your topic wikis plus shared metadata. Bootstrap one with:
 >
-> Just tell me the topic, and I'll set everything up.
-
-**Step 2: On user response,** derive a slug from their topic (lowercase, hyphens, max 40 chars) and run the full init protocol:
-1. Create the hub if it doesn't exist (at the resolved HUB path from config, or ask the user where to create it if no config exists — never assume `~/wiki/`)
-2. Create the topic wiki at `HUB/topics/<slug>/` with full directory structure
-3. Register in wikis.json and update hub _index.md
-4. Create config.md using the user's topic description
-
-**Step 3: After init completes,** suggest the immediate next action based on what's most likely useful:
-
-> **Wiki created at `HUB/topics/<slug>/`**
+> - `/wiki:init` — pick a workspace path, write the sentinel + hub files, walk through the first-run primer
 >
-> What would you like to do first?
+> If you already have a workspace somewhere and need to point this session at it, run:
 >
-> 1. **Research** — I'll search the web and build your knowledge base automatically
->    → Just say: `/wiki:research "<your topic>" --wiki <slug>`
->
-> 2. **Add a specific source** — paste a URL or file path
->    → Just say: `/wiki:ingest <url>`
->
-> 3. **Import existing notes** — drop files into `HUB/topics/<slug>/inbox/`
->    → Then run: `/wiki:ingest --inbox`
+> - `/wiki:wiki config hub-path <path>` — set the hub path explicitly (legacy fallback for sessions where the sentinel walk-up doesn't reach the workspace)
 
-Do NOT show the full command reference, config options, or advanced flags during onboarding. Keep it to these three options. The user can discover the rest via `/wiki` (status view) once they have a wiki.
-
-**Permission hint (one-time):** If this is the first wiki being created, also append:
-
-> **Tip:** Research sessions fetch many URLs. To skip approval prompts, add this to your project's `.claude/settings.local.json`:
-> ```json
-> "WebFetch", "WebSearch"
-> ```
-> in the `permissions.allow` array.
+Don't dump the full command list at this stage. The user gets oriented during `/wiki:init`.
 
 ---
 
