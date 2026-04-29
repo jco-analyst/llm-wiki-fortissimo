@@ -7,7 +7,7 @@ Content-level wiki maintenance: staleness detection, quality scoring, factual ve
 1. **Score then act.** The librarian produces scores and reports. It never modifies wiki content during a scan. Write operations (fix, auto-fix) are separate commands requiring explicit confirmation.
 2. **Conservative by default.** When uncertain, flag for human review rather than auto-classifying as clean. Lean toward false positives over false negatives.
 3. **Checkpoint everything.** After scoring each article, write the result to `.librarian/checkpoint.json`. If the session drops, the next invocation resumes from where it left off.
-4. **Two-tier escalation.** Quick metadata-only scan first (cheap). Deep content read only for articles that score below threshold or have `volatility: hot`. Token cost scales with problem density, not wiki size.
+4. **Two-tier escalation.** Quick metadata-only scan first (cheap). Deep content read only for articles that score below threshold or have `decay_class: fast`. Token cost scales with problem density, not wiki size.
 5. **Machine-readable first.** `.librarian/scan-results.json` is the source of truth. `REPORT.md` is rendered from it. Other skills read the JSON.
 
 ## Staleness Scoring (Pass 1)
@@ -23,15 +23,15 @@ Composite score 0-100 across four dimensions, each contributing 0-25 points. Use
 | Compilation recency | Article currency | `updated:` date | Days since updated |
 | Source chain integrity | Referenced sources exist | `sources:` entries | Percentage of sources that resolve to actual files |
 
-### Decay Curves by Volatility
+### Decay Curves by Decay Class
 
-Each dimension's raw day-count is converted to a 0-25 score using exponential decay scaled by the article's `volatility` tier:
+Each dimension's raw day-count is converted to a 0-25 score using exponential decay scaled by the article's `decay_class` tier:
 
-| Volatility | Half-life (days) | Effect |
+| Decay class | Half-life (days) | Effect |
 |------------|-----------------|--------|
-| `hot` | 30 | Score decays quickly — 60-day-old hot article scores ~50% |
-| `warm` | 90 | Moderate decay — 90-day-old warm article scores ~50% |
-| `cold` | 365 | Slow decay — cold articles stay fresh for a year |
+| `fast` | 30 | Score decays quickly — 60-day-old `fast` article scores ~50% |
+| `med` | 90 | Moderate decay — 90-day-old `med` article scores ~50% |
+| `slow` | 365 | Slow decay — `slow` articles stay fresh for a year |
 
 **Formula per dimension** (except source chain integrity):
 
@@ -55,7 +55,7 @@ Range: 0 (completely stale) to 100 (perfectly fresh).
 
 ### Missing Fields
 
-- Missing `volatility`: treat as `warm` (safe default, matches C15 auto-fix)
+- Missing `decay_class`: treat as `med` (safe default, matches C15 auto-fix)
 - Missing `verified`: treat as never verified — verification_recency = 0
 - Missing `updated`: fall back to `created` date
 - Missing `sources`: integrity = 0 (no sources to verify)
@@ -87,7 +87,7 @@ Four dimensions, each scored 1-5. Composite quality score is the average, mapped
 - Read the full article body.
 - Score coherence and utility by analyzing the content.
 - Refine the depth and source quality scores from Tier 1.
-- Escalation triggers: staleness score < 70, volatility = hot, or Tier 1 depth proxy = 1-2.
+- Escalation triggers: staleness score < 70, decay_class = fast, or Tier 1 depth proxy = 1-2.
 
 ### Quality Flags
 
@@ -97,7 +97,7 @@ In addition to numeric scores, tag articles with specific quality flags:
 |------|---------|
 | `thin-coverage` | Depth score 1-2 |
 | `single-source` | Only one source in `sources:` |
-| `low-confidence-sources` | Average source confidence below medium |
+| `low-confidence-sources` | Average source confidence below `Stated` (i.e., majority `Inferred`) |
 | `no-see-also` | Zero "See Also" cross-references |
 | `stale` | Staleness score below threshold |
 | `unverified` | Missing `verified:` field |

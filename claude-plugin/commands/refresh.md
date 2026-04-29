@@ -17,7 +17,7 @@ Check whether wiki articles are still current by re-examining their sources. Thi
 ### Parse $ARGUMENTS
 
 - **article-path**: Path to a specific wiki article to refresh (e.g., `wiki/concepts/nvidia-spark.md`)
-- **--due**: Check ALL articles past their volatility tier's staleness threshold. Present a numbered list for the user to select which ones to refresh.
+- **--due**: Check ALL articles past their decay class tier's staleness threshold. Present a numbered list for the user to select which ones to refresh.
 - If neither is provided, show articles sorted by staleness (most overdue first) and ask which to check.
 
 ### Refresh Protocol
@@ -62,7 +62,7 @@ Present the assessment to the user with options per source:
    → skip | retract
 
 ### Article freshness
-Current: volatility hot, verified 45 days ago
+Current: decay_class fast, verified 45 days ago
 Recommendation: update sources 2, retract source 3
 ```
 
@@ -79,7 +79,7 @@ After all actions, update the article's `verified` date to today.
 When `--due` is set:
 
 1. Read all wiki articles (glob `wiki/**/*.md`, exclude `_index.md`)
-2. For each, read `volatility` and `verified` from frontmatter
+2. For each, read `decay_class` and `verified` from frontmatter
 3. Compute days since verified
 4. Read `freshness_threshold` from `config.md` (default: 70)
 5. Filter to articles scoring below the threshold
@@ -89,9 +89,9 @@ When `--due` is set:
 ```
 ### Articles due for freshness review
 
-1. [NVIDIA Spark Specs](wiki/topics/nvidia-spark.md) — score 42/100 (hot, sources 120d old, unverified 62d)
-2. [CLI UX Patterns](wiki/concepts/cli-ux-patterns.md) — score 65/100 (warm, sources 105d old, unverified 105d)
-3. [TCP/IP Fundamentals](wiki/references/tcp-ip.md) — score 94/100 (cold, stable — informational only)
+1. [NIST CSF 2.0 Subcategories](wiki/topics/nist-csf-2-subcategories.md) — score 42/100 (fast, sources 120d old, unverified 62d)
+2. [Control Mapping Patterns](wiki/concepts/control-mapping-patterns.md) — score 65/100 (med, sources 105d old, unverified 105d)
+3. [TCP/IP Fundamentals](wiki/references/tcp-ip.md) — score 94/100 (slow, stable — informational only)
 
 Enter numbers (e.g. 1,2), "all", or "skip":
 ```

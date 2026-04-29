@@ -28,7 +28,7 @@ Each entry: numbered patch, file(s) touched, semantic category, rationale. Patch
 
 | # | File(s) | Category | Why |
 |---|---|---|---|
-| (none yet — initial fork) | — | — | — |
+| 01 | claude-plugin/skills/wiki-manager/{SKILL,references/{wiki-structure,compilation,librarian,linting,audit,research-infrastructure}}.md, claude-plugin/commands/{librarian,lint,refresh,query,research,ll}.md, AGENTS.md, tests/* | vocabulary | Vocabulary swap: `volatility:` → `decay_class:` (`hot\|warm\|cold` → `fast\|med\|slow`) and `confidence:` enum (`high\|medium\|low` → `Confirmed\|Stated\|Inferred`). Aligns with Aziz's EM v1.5 Confirmed/Stated/Inferred. Decay class rename avoids collision with EM Archive Hot/Warm/Cold storage tiers. Defect fixture `missing-volatility/` renamed `missing-decay-class/`. Test enum lists updated. All 92 structural assertions pass; codex+opencode mirrors regenerated. |
 
 (Patches added below as commits land.)
 

@@ -51,7 +51,7 @@ Flags (apply to `scan`):
 For each pending article:
 
 1. Read the article's YAML frontmatter (do NOT read the full body yet — Tier 1 is metadata-only).
-2. Read `volatility` (default: `warm`), `verified`, `updated`, `created`, `sources`, `confidence`.
+2. Read `decay_class` (default: `med`), `verified`, `updated`, `created`, `sources`, `confidence`.
 3. For each entry in `sources:`, check if the raw file exists (Glob or Read). Record resolved count.
 4. For resolved sources, read their `ingested:` date from frontmatter.
 5. Compute staleness score using the formula in `references/librarian.md` § Staleness Scoring.
@@ -70,7 +70,7 @@ For each article (same loop, immediately after staleness):
 
 **Tier 2 escalation** — read the full article body if ANY of these are true:
 - Staleness score < threshold (from Pass 1)
-- `volatility: hot`
+- `decay_class: fast`
 - Tier 1 depth proxy = 1 or 2 (suspected stub)
 
 When escalated:
@@ -104,7 +104,7 @@ After all articles are scored:
    → Refresh sources? (y/n/skip)
 
 2. [CLI UX Patterns](wiki/concepts/cli-ux-patterns.md) — score 45/100
-   Verified 120 days ago, warm volatility.
+   Verified 120 days ago, `med` decay class.
    → Verify still accurate? (y/n/skip)
 ```
 
@@ -153,4 +153,4 @@ When the user runs `report` (or `/wiki:librarian report`):
 1. Check if `.librarian/REPORT.md` exists. If not: "No librarian report found. Run `/wiki:librarian scan` first."
 2. Read and display `REPORT.md`.
 3. Note when the scan was run (from `scan-results.json` → `completed_at`).
-4. If the scan is older than the wiki's staleness threshold for hot articles (30 days), suggest re-scanning.
+4. If the scan is older than the wiki's staleness threshold for `fast` articles (30 days), suggest re-scanning.

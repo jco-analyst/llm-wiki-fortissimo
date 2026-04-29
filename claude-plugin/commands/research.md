@@ -506,9 +506,9 @@ After all agents return and before ingestion, run a credibility assessment. This
 | Corroboration (multiple agents found similar claims) | +1 per additional agent, max +2 |
 
 **Credibility tiers**:
-- **High** (4-6 points): Peer-reviewed, recent, authoritative, unbiased → ingest with confidence: high
-- **Medium** (2-3 points): Published but not peer-reviewed, or older, or unknown author → ingest with confidence: medium
-- **Low** (0-1 points): Blog, press release, unverifiable, biased → ingest only if no better source covers this angle; set confidence: low
+- **High** (4-6 points): Peer-reviewed, recent, authoritative, unbiased → ingest with confidence: Confirmed
+- **Medium** (2-3 points): Published but not peer-reviewed, or older, or unknown author → ingest with confidence: Stated
+- **Low** (0-1 points): Blog, press release, unverifiable, biased → ingest only if no better source covers this angle; set confidence: Inferred
 - **Reject** (<0 points): Obvious spam, predatory journal, fabricated data → skip entirely
 
 **Process**:

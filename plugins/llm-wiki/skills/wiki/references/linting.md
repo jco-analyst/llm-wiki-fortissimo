@@ -246,28 +246,28 @@ Note: thesis files use `type: thesis`, not `category`. Do not alias `theses` to 
 
 ### C14: Freshness (Warning/Info)
 
-Computes a composite freshness score (0-100) for each compiled wiki article based on four dimensions: source freshness, verification recency, compilation recency, and source chain integrity. Each dimension contributes 0-25 points, with decay curves scaled by the article's `volatility` tier. See `wiki-structure.md` § Freshness Score for the full formula.
+Computes a composite freshness score (0-100) for each compiled wiki article based on four dimensions: source freshness, verification recency, compilation recency, and source chain integrity. Each dimension contributes 0-25 points, with decay curves scaled by the article's `decay_class` tier. See `wiki-structure.md` § Freshness Score for the full formula.
 
-- [ ] For each wiki article with `volatility` and `verified` fields, compute the four-dimension composite score
+- [ ] For each wiki article with `decay_class` and `verified` fields, compute the four-dimension composite score
 - [ ] Read `freshness_threshold` from `config.md` (default: 70 if not set)
 - [ ] Flag articles scoring below the threshold
 
-**Severity**: Warning for `hot` and `warm` articles below threshold. Info for `cold` articles below threshold (Lindy Effect — cold content scoring low is unusual and worth noting, but rarely urgent).
+**Severity**: Warning for `fast` and `med` articles below threshold. Info for `slow` articles below threshold (Lindy Effect — `slow` content scoring low is unusual and worth noting, but rarely urgent).
 
 **Output**: `Freshness score [score]/100: [article] — source age [avg days], verified [days] ago, compiled [days] ago, [N/M] sources intact. Run /wiki:refresh [path]`
 
 **Auto-fix**: None. Freshness requires human judgment — automated recompilation risks the "confident wrong answer" problem where stale content is replaced by hallucinated content.
 
-### C15: Missing Volatility (Info)
+### C15: Missing Decay Class (Info)
 
-Flags wiki articles that lack the `volatility` field. New articles should always have volatility set during compilation.
+Flags wiki articles that lack the `decay_class` field. New articles should always have `decay_class` set during compilation.
 
-- [ ] For each `.md` file in `wiki/` (excluding `_index.md`), check for `volatility` field in frontmatter
+- [ ] For each `.md` file in `wiki/` (excluding `_index.md`), check for `decay_class` field in frontmatter
 - [ ] Flag files missing the field
 
 **Severity**: Info (not blocking — existing wikis predate this field).
 
-**Auto-fix**: Add `volatility: warm` and `verified: <updated date from frontmatter>` — safe defaults that put the article into the standard monitoring cadence.
+**Auto-fix**: Add `decay_class: med` and `verified: <updated date from frontmatter>` — safe defaults that put the article into the standard monitoring cadence.
 
 ## Auto-Fix Rules (when --fix is set)
 
@@ -296,7 +296,7 @@ Flags wiki articles that lack the `volatility` field. New articles should always
 | **C13** Legacy frontmatter key | Rewrite key to canonical per alias table |
 | **C13** Legacy enum value | Rewrite value to canonical per alias table |
 | **C14** Article below freshness score threshold | **Warn/Info only** — composite score below `freshness_threshold` (default 70). Report score breakdown and suggest `/wiki:refresh`. |
-| **C15** Missing volatility field | Add `volatility: warm` and `verified: <updated>` — safe defaults |
+| **C15** Missing decay_class field | Add `decay_class: med` and `verified: <updated>` — safe defaults |
 
 ## Report Format
 

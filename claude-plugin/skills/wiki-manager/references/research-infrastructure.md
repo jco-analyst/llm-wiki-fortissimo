@@ -96,9 +96,9 @@ Independent assessment of source credibility before ingestion. Prevents the "fox
 
 | Tier | Score Range | Action | Confidence Tag |
 |------|------------|--------|---------------|
-| High | 4-6 | Ingest | confidence: high |
-| Medium | 2-3 | Ingest | confidence: medium |
-| Low | 0-1 | Ingest only if unique angle | confidence: low |
+| High | 4-6 | Ingest | confidence: Confirmed |
+| Medium | 2-3 | Ingest | confidence: Stated |
+| Low | 0-1 | Ingest only if unique angle | confidence: Inferred |
 | Reject | <0 | Skip | — |
 
 ### Bias Detection Signals

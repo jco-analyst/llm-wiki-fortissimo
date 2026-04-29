@@ -110,7 +110,7 @@ date: YYYY-MM-DD
 tags: [lessons-learned, <topic-tags>]
 lesson_count: N
 category: notes
-confidence: high
+confidence: Confirmed
 summary: "<one-line summary of what was learned>"
 ---
 

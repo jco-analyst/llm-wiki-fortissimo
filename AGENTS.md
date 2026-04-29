@@ -83,7 +83,7 @@ Same structure as a topic wiki but at `<project>/.wiki/`. Add `.wiki/` to `.giti
 6. **Incremental by default.** Only compile new sources unless explicitly asked for full recompile.
 7. **Honest gaps.** If the wiki doesn't have the answer, say so. Suggest what to ingest.
 8. **Multi-wiki peek.** When querying, answer from the target wiki, then peek at sibling wiki `_index.md` files for overlap.
-9. **Confidence scoring.** Articles get `confidence: high|medium|low` in frontmatter based on source quality.
+9. **Confidence scoring.** Articles get `confidence: Confirmed|Stated|Inferred` in frontmatter based on source quality.
 10. **Activity log.** Append every operation to `log.md`. Format: `## [YYYY-MM-DD] operation | Description`. Never edit existing entries.
 
 ## File Formats
@@ -138,7 +138,8 @@ created: YYYY-MM-DD
 updated: YYYY-MM-DD
 tags: [tag1, tag2]
 aliases: [alternate names]
-confidence: high|medium|low
+confidence: Confirmed|Stated|Inferred
+decay_class: fast|med|slow
 summary: "2-3 sentence summary"
 ---
 ```
@@ -269,7 +270,7 @@ Remove a regretted source and clean up its downstream effects. Requires `--reaso
 
 ### Refresh
 
-Freshness check for wiki articles. Re-fetches source URLs, detects changes (cosmetic, additive, contradictory), and presents a human-gated assessment. Three tiers: source check → change assessment → action decision (skip/update/flag/retract). `--due` flag shows all articles past their volatility threshold. Never auto-recompiles — human confirms every change.
+Freshness check for wiki articles. Re-fetches source URLs, detects changes (cosmetic, additive, contradictory), and presents a human-gated assessment. Three tiers: source check → change assessment → action decision (skip/update/flag/retract). `--due` flag shows all articles past their decay class threshold. Never auto-recompiles — human confirms every change.
 
 ### Lint
 
@@ -335,11 +336,11 @@ Flags: `--artifact <path>`, `--project <slug>`, `--wiki-only`, `--outputs-only`,
 Content-level wiki maintenance: staleness detection, quality scoring, factual verification, semantic coherence, deduplication. Produces scored reports — never modifies content without confirmation.
 
 **Subcommands**:
-- **scan**: Score all wiki articles for staleness and quality. Two-tier: quick metadata scan first, deep content read only for articles below threshold or with `volatility: hot`. Checkpoints after each article for crash recovery. Results to `.librarian/scan-results.json` and `.librarian/REPORT.md`.
+- **scan**: Score all wiki articles for staleness and quality. Two-tier: quick metadata scan first, deep content read only for articles below threshold or with `decay_class: fast`. Checkpoints after each article for crash recovery. Results to `.librarian/scan-results.json` and `.librarian/REPORT.md`.
 - **report**: Display the latest scan report.
 - **fix <id>**: Apply a proposed fix from the report (Phase 3 — not yet implemented).
 
-**Staleness scoring** (0-100): four dimensions at 25 points each — source freshness, verification recency, compilation recency, source chain integrity. Decay curves scaled by article `volatility` tier (hot/warm/cold).
+**Staleness scoring** (0-100): four dimensions at 25 points each — source freshness, verification recency, compilation recency, source chain integrity. Decay curves scaled by article `decay_class` tier (fast/med/slow).
 
 **Quality scoring** (0-100): four dimensions at 25 points each — source diversity, content depth, cross-reference density, summary quality. Articles scoring below 40 on either dimension are flagged.
 

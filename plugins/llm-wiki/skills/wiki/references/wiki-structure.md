@@ -231,8 +231,8 @@ created: YYYY-MM-DD
 updated: YYYY-MM-DD
 tags: [tag1, tag2]
 aliases: [alternate names for Obsidian discovery]
-confidence: high|medium|low
-volatility: hot|warm|cold
+confidence: Confirmed|Stated|Inferred
+decay_class: fast|med|slow
 verified: YYYY-MM-DD
 summary: "2-3 sentence summary for index"
 ---
@@ -259,17 +259,19 @@ This ensures both Obsidian (reads [[wikilink]]) and the agent (follows relative 
 - [Source Title](../../raw/type/file.md) — what this source contributed
 ```
 
-## Volatility Classification
+## Decay Class Classification
 
-Wiki articles carry a `volatility` field that controls how quickly their freshness score decays. The `verified` field records when a human last confirmed the article's conclusions are still accurate.
+Wiki articles carry a `decay_class` field that controls how quickly their freshness score decays. The `verified` field records when a human last confirmed the article's conclusions are still accurate.
+
+> **Naming note (HORDE fork):** upstream nvk calls this field `volatility` with values `hot|warm|cold`. The HORDE fork renames it to `decay_class` with values `fast|med|slow` to avoid colliding with Aziz's Engagement Memory v1.5 storage tiers (`Archive Hot`, `Archive Warm`, `Archive Cold`), which mean "tier of demoted-by-capacity content," not "subject-matter volatility." Same algorithm, same half-lives — different name.
 
 | Tier | Decay rate | When to use | Examples |
 |------|-----------|-------------|----------|
-| `hot` | Fast | Fast-moving sources: product specs, pricing, current events, competitive landscape | NVIDIA Spark specs, election results, API changelog |
-| `warm` | Moderate | Quarterly-to-annual cadence: best practices, framework comparisons, market analysis | Testing patterns, CLI UX patterns, market positioning |
-| `cold` | Slow | Foundational concepts, historical events, mathematical proofs, stable reference | TCP/IP fundamentals, Lindy Effect, cryptographic algorithms |
+| `fast` | Fast | Fast-moving sources: regulations, vendor specs, current events, competitive landscape, threat intelligence | CVE feeds, NIST CSF release notes, vendor pricing |
+| `med` | Moderate | Quarterly-to-annual cadence: frameworks, best practices, market analysis | Testing patterns, framework comparisons, control mappings |
+| `slow` | Slow | Foundational concepts, historical events, mathematical proofs, stable reference | TCP/IP fundamentals, cryptographic algorithms, foundational standards |
 
-Default is `warm`. The compilation agent sets volatility based on source characteristics: news/trends sources suggest `hot`, foundational/historical sources suggest `cold`. Authors can override.
+Default is `med`. The compilation agent sets decay class based on source characteristics: news/trends and rapidly-changing reference sources suggest `fast`, foundational/historical sources suggest `slow`. Authors can override.
 
 ### Freshness Score (0-100)
 
@@ -282,9 +284,9 @@ Each article's freshness is a composite of four dimensions, each contributing 0-
 | **Compilation recency** | When was this article last recompiled? | Days since `updated:` |
 | **Source chain integrity** | Do all referenced sources still exist? | % of `sources:` entries that resolve to actual files |
 
-Each dimension's decay curve is scaled by the article's `volatility` tier — a hot article's source freshness decays faster than a cold one's. The Lindy Effect applies: cold content that has survived without needing updates is more durable, not less.
+Each dimension's decay curve is scaled by the article's `decay_class` tier — a `fast` article's source freshness decays faster than a `slow` one's. The Lindy Effect applies: `slow` content that has survived without needing updates is more durable, not less.
 
-The freshness threshold is set per wiki in `config.md` (default: 70). Articles scoring below the threshold are flagged by lint. There are no hardcoded day cutoffs — the composite score naturally flags the right articles at the right time based on their volatility and the actual state of their sources.
+The freshness threshold is set per wiki in `config.md` (default: 70). Articles scoring below the threshold are flagged by lint. There are no hardcoded day cutoffs — the composite score naturally flags the right articles at the right time based on their decay class and the actual state of their sources.
 
 ## Dual-Link Convention
 

@@ -106,23 +106,23 @@ cp -r "$GOLDEN" "$DEFECTS/unknown-file"
 echo "this is not a markdown file" > "$DEFECTS/unknown-file/raw/stray.txt"
 echo "  Created: unknown-file (C12)"
 
-# C14: stale-article — hot article verified over 30 days ago
+# C14: stale-article — fast-decay article verified over 30 days ago
 cp -r "$GOLDEN" "$DEFECTS/stale-article"
-sed -i.bak 's/volatility: warm/volatility: hot/' \
+sed -i.bak 's/decay_class: med/decay_class: fast/' \
   "$DEFECTS/stale-article/wiki/concepts/sample-concept.md"
 sed -i.bak 's/verified: 2026-01-01/verified: 2025-01-01/' \
   "$DEFECTS/stale-article/wiki/concepts/sample-concept.md"
 rm -f "$DEFECTS/stale-article/wiki/concepts/sample-concept.md.bak"
 echo "  Created: stale-article (C14)"
 
-# C15: missing-volatility — article without volatility field
-cp -r "$GOLDEN" "$DEFECTS/missing-volatility"
-sed -i.bak '/^volatility:/d' \
-  "$DEFECTS/missing-volatility/wiki/concepts/sample-concept.md"
+# C15: missing-decay-class — article without decay_class field
+cp -r "$GOLDEN" "$DEFECTS/missing-decay-class"
+sed -i.bak '/^decay_class:/d' \
+  "$DEFECTS/missing-decay-class/wiki/concepts/sample-concept.md"
 sed -i.bak '/^verified:/d' \
-  "$DEFECTS/missing-volatility/wiki/concepts/sample-concept.md"
-rm -f "$DEFECTS/missing-volatility/wiki/concepts/sample-concept.md.bak"
-echo "  Created: missing-volatility (C15)"
+  "$DEFECTS/missing-decay-class/wiki/concepts/sample-concept.md"
+rm -f "$DEFECTS/missing-decay-class/wiki/concepts/sample-concept.md.bak"
+echo "  Created: missing-decay-class (C15)"
 
 COUNT=$(ls -d "$DEFECTS"/*/ 2>/dev/null | wc -l | tr -d ' ')
 echo ""

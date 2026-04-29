@@ -82,25 +82,25 @@ while IFS= read -r -d '' file; do
   esac
 done < <(find "$GOLDEN/wiki" -name "*.md" -not -name "_index.md" -print0)
 
-# confidence enum
+# confidence enum (HORDE: Confirmed/Stated/Inferred per Aziz EM v1.5)
 while IFS= read -r -d '' file; do
   bn=$(basename "$file")
   conf_val=$(grep "^confidence:" "$file" | head -1 | sed 's/confidence: *//')
   case "$conf_val" in
-    high|medium|low) log_pass "valid confidence '$conf_val' in $bn" ;;
-    *) log_fail "invalid confidence '$conf_val' in $bn" "C2 violation" ;;
+    Confirmed|Stated|Inferred) log_pass "valid confidence '$conf_val' in $bn" ;;
+    *) log_fail "invalid confidence '$conf_val' in $bn" "C2 violation (expected Confirmed|Stated|Inferred)" ;;
   esac
 done < <(find "$GOLDEN/wiki" -name "*.md" -not -name "_index.md" -print0)
 
-# volatility enum
+# decay_class enum (HORDE: renamed from volatility to avoid EM Archive Hot/Warm/Cold collision)
 while IFS= read -r -d '' file; do
   bn=$(basename "$file")
-  # Check volatility field (new schema)
-  vol=$(grep "^volatility:" "$file" | head -1 | sed 's/volatility: *//')
-  if [ -n "$vol" ]; then
-    case "$vol" in
-      hot|warm|cold) log_pass "valid volatility '$vol' in $bn" ;;
-      *) log_fail "invalid volatility '$vol' in $bn" "expected hot|warm|cold" ;;
+  # Check decay_class field (HORDE schema; nvk upstream uses volatility)
+  dc=$(grep "^decay_class:" "$file" | head -1 | sed 's/decay_class: *//')
+  if [ -n "$dc" ]; then
+    case "$dc" in
+      fast|med|slow) log_pass "valid decay_class '$dc' in $bn" ;;
+      *) log_fail "invalid decay_class '$dc' in $bn" "expected fast|med|slow" ;;
     esac
   fi
 done < <(find "$GOLDEN/wiki" -name "*.md" -not -name "_index.md" -print0)
@@ -304,16 +304,16 @@ if [ -d "$DEFECTS" ]; then
   }
 
   [ -d "$DEFECTS/stale-article" ] && {
-    grep -q "volatility: hot" "$DEFECTS/stale-article/wiki/concepts/sample-concept.md" 2>/dev/null \
+    grep -q "decay_class: fast" "$DEFECTS/stale-article/wiki/concepts/sample-concept.md" 2>/dev/null \
       && grep -q "verified: 2025-01-01" "$DEFECTS/stale-article/wiki/concepts/sample-concept.md" 2>/dev/null \
       && log_pass "stale-article: C14 defect present" \
-      || log_fail "stale-article: no stale volatility/verified" "fixture broken"
+      || log_fail "stale-article: no stale decay_class/verified" "fixture broken"
   }
 
-  [ -d "$DEFECTS/missing-volatility" ] && {
-    ! grep -q "^volatility:" "$DEFECTS/missing-volatility/wiki/concepts/sample-concept.md" 2>/dev/null \
-      && log_pass "missing-volatility: C15 defect present" \
-      || log_fail "missing-volatility: volatility field still present" "fixture broken"
+  [ -d "$DEFECTS/missing-decay-class" ] && {
+    ! grep -q "^decay_class:" "$DEFECTS/missing-decay-class/wiki/concepts/sample-concept.md" 2>/dev/null \
+      && log_pass "missing-decay-class: C15 defect present" \
+      || log_fail "missing-decay-class: decay_class field still present" "fixture broken"
   }
 else
   echo ""

@@ -53,13 +53,13 @@ Read `wiki/_index.md` and category indexes. For each key concept:
 6. Generate frontmatter per `references/wiki-structure.md` — include `aliases` for alternate names
 7. Add `aliases` in frontmatter for any common alternate names (e.g., `aliases: [GPT, Generative Pre-trained Transformer]`)
 8. Set `confidence` in frontmatter based on source credibility AND corroboration:
-   - `high`: multiple sources with credibility score 4+ agree, OR single peer-reviewed meta-analysis/systematic review
-   - `medium`: single credible source (score 2-3), OR multiple sources partially agree, OR recent findings not yet replicated
-   - `low`: single non-peer-reviewed source (score 0-1), OR sources disagree, OR anecdotal only
+   - `Confirmed`: multiple sources with credibility score 4+ agree, OR single peer-reviewed meta-analysis/systematic review, OR directly verified by the operator
+   - `Stated`: single credible source (score 2-3), OR multiple sources partially agree, OR recent findings not yet replicated — the source asserts it, but corroboration is partial
+   - `Inferred`: single non-peer-reviewed source (score 0-1), OR sources disagree, OR derived/extrapolated rather than directly attested
 
    When Phase 2b credibility scores are available, use them directly. When compiling without a preceding research phase (e.g., manual ingest → compile), assess credibility inline.
 
-When creating or updating a wiki article, set `volatility` and `verified` in frontmatter. Default `volatility` to `warm`. Set `verified` to today's date. If the article's sources are primarily news/trends (type: articles with recent ingestion dates), suggest `hot`. If sources are foundational papers, historical references, or mathematical content, suggest `cold`. The author can override during review.
+When creating or updating a wiki article, set `decay_class` and `verified` in frontmatter. Default `decay_class` to `med`. Set `verified` to today's date. If the article's sources are primarily news/trends or rapidly-changing reference (type: articles with recent ingestion dates, or fast-moving regulations/threat data), suggest `fast`. If sources are foundational papers, historical references, or mathematical content, suggest `slow`. The author can override during review.
 
 **For updated articles:**
 

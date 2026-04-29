@@ -114,7 +114,7 @@ Escalate beyond local files when any of these are true:
 - an output is drifted or has a provenance gap
 - a cited wiki article is stale, weak, or contradictory
 - the source chain is thin and the claim matters
-- the topic is `volatility: hot`
+- the topic is `decay_class: fast`
 - there are conflicting local claims that need external resolution
 
 ### Research protocol

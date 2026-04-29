@@ -7,8 +7,8 @@ sources:
 created: 2026-01-01
 updated: 2026-01-02
 tags: [machine-learning, patterns, evals]
-confidence: high
-volatility: warm
+confidence: Confirmed
+decay_class: med
 verified: 2026-01-01
 summary: "Testing patterns for LLM tools — three-layer model with pass@k reliability metrics."
 ---

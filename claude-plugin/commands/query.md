@@ -178,8 +178,8 @@ Context reload for new sessions. Reads persistent state and outputs a briefing s
 
 ---
 **Sources used:**
-- [Article 1](path) (confidence: high) — what was drawn from it
-- [Article 2](path) (confidence: medium) — what was drawn from it
+- [Article 1](path) (confidence: Confirmed) — what was drawn from it
+- [Article 2](path) (confidence: Stated) — what was drawn from it
 
 **Related in other wikis:** (if any, or if --deep)
 - [wiki-name]: [Article Title] — appears relevant
