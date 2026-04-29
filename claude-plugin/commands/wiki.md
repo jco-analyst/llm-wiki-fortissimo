@@ -36,6 +36,26 @@ Exactly one must be chosen. The flag is recorded in `wikis.json` for the future 
 
 **Steps:**
 
+0. **First-run primer (only when HUB doesn't exist).** Before creating anything, show:
+
+   > **Setting up your Fortissimo wiki workspace.**
+   >
+   > A workspace is a single root directory holding all your topic wikis plus shared metadata. Once it exists, every `/wiki:` command run from anywhere inside the workspace finds it automatically (via the `.fortissimo-vault.json` sentinel — written next).
+   >
+   > About to create:
+   > - **`<HUB>/`** — workspace root (where you tell me)
+   > - **`<HUB>/.fortissimo-vault.json`** — sentinel + workspace metadata (workspace_name, owner, em_root, topics_root)
+   > - **`<HUB>/wikis.json`** — registry of your topic wikis (with isolation flags: commons / client / personal)
+   > - **`<HUB>/_index.md`** + **`<HUB>/log.md`** — hub-level navigation and append-only activity log
+   > - **`<HUB>/topics/`** — directory holding each topic wiki
+   > - **`<HUB>/topics/<your-first-topic>/`** — your first topic, with `raw/` (immutable sources), `wiki/` (compiled articles), `output/` (deliverables), `inbox/` (drop zone)
+   >
+   > **Engagement Memory note:** if you keep an EM v1.5 store at `<HUB>/em/`, the wiki never touches it. Cross-cite EM entries from wiki articles via the `em_refs:` frontmatter field. EM stays owned by EM; the wiki stays owned by the wiki.
+   >
+   > Continue?
+
+   Pause for confirmation. Then proceed.
+
 1. If HUB doesn't exist yet, create the hub first:
    - `HUB/.fortissimo-vault.json` (workspace sentinel — HORDE fork). Ask the user for `workspace_name` (default: directory basename) and `owner`. Write:
      ```json
@@ -107,7 +127,41 @@ Exactly one must be chosen. The flag is recorded in `wikis.json` for the future 
 
 7. Register in `HUB/wikis.json` and update hub `_index.md` topic wiki table. Include the isolation flag (`commons: true`, `client: "<name>"`, or `personal: true`) on the entry — see `references/wiki-structure.md` § "Isolation flags". For local wikis, add to the `local_wikis` array (no isolation flag — local wikis are out of scope for the future hook layer).
 
-8. Report what was created and suggest:
+8. Report what was created.
+
+   **First-run orientation (only when HUB was created in this invocation).** Show:
+
+   > **Workspace ready** at `<HUB>/`.
+   >
+   > **The three core operations** (Karpathy pattern):
+   > - `/wiki:ingest <url|file|text>` — add a source. Source goes to `raw/<type>/` immutably. Never edited after.
+   > - `/wiki:compile` — synthesize ingested sources into wiki articles under `wiki/{concepts,topics,references,theses}/`. Re-runnable — articles update as sources accumulate.
+   > - `/wiki:query "<question>"` — ask a question, get an answer with citations back to source material.
+   >
+   > **Topic types** (set the isolation flag at init time, recorded in `wikis.json`):
+   > - `commons` — generally-applicable knowledge (frameworks, methodology, standards). Visible to every session.
+   > - `client: "<name>"` — engagement-specific knowledge (e.g., `client: "uline"`). Designed to stay isolated from other engagements when the future hook layer ships.
+   > - `personal` — your own research, learning, notes.
+   >
+   > **Cross-topic peek** — querying from inside one topic surfaces relevant material from sibling topics too. That's the whole feature: connections compounding across knowledge areas (cybersecurity frameworks ↔ GRC methodology ↔ client work ↔ personal research).
+   >
+   > **Frontmatter cross-citation** — wiki articles can carry `pillar:`, `em_refs: [FACT-PRO-...]`, `source_provenance:` (chat URLs / extraction context), and `supersedes:` / `superseded_by:` for version handoffs. All optional, all additive.
+   >
+   > **Beyond the core ops:**
+   > - `/wiki:librarian` — scan article quality, flag stale entries (uses freshness scoring scaled by `decay_class`)
+   > - `/wiki:lint` — structural integrity check (15 rules: dead links, missing indexes, orphan sources, supersession chains)
+   > - `/wiki:refresh` — re-verify aging articles against current sources
+   > - `/wiki:research <topic> --sources 10` — parallel-agent web research, auto-ingest results
+   > - `/wiki:audit` — truth-seeking audit of an output artifact, follows the citation chain
+   > - `/wiki:project new <slug> "<goal>"` — start a deliverable folder (with `WHY.md`)
+   >
+   > **Adding more topics later:**
+   > - `/wiki init nist-csf-3 --commons` — another commons topic
+   > - `/wiki init <client-name> --client <client-name>` — a new client engagement
+   >
+   > Type `/wiki` anytime for status. Type `/wiki <natural language>` to let me route automatically (e.g., `/wiki "what does NIST CSF say about supply chain risk"` → query).
+
+   **Subsequent-init suggestion (when HUB already existed before this invocation).** Show the brief version:
    - `/wiki:research "topic" --sources 10` — auto-research to bootstrap
    - `/wiki:ingest <url|file|text>` — add source material
    - `/wiki:compile` — compile sources into wiki articles
