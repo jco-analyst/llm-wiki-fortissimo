@@ -1,7 +1,7 @@
 {
   "name": "wiki",
   "description": "LLM-compiled knowledge base. HORDE fork of nvk/llm-wiki for the Fortissimo Reference Corpus.",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "author": {
     "name": "jco-analyst (HORDE fork of nvk)"
   },
