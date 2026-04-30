@@ -232,7 +232,7 @@ source: "URL or filepath or MANUAL"
 type: articles|papers|repos|notes|data
 ingested: YYYY-MM-DD
 tags: [tag1, tag2]
-summary: "2-3 sentence summary"
+summary: "2-3 sentence plain-prose summary, rendered verbatim in indexes"
 ---
 
 # Title
@@ -265,7 +265,7 @@ aliases: [alternate names for Obsidian discovery]
 confidence: Confirmed|Stated|Inferred
 decay_class: fast|med|slow
 verified: YYYY-MM-DD
-summary: "2-3 sentence summary for index"
+summary: "2-3 sentence plain-prose summary, rendered verbatim in indexes"
 
 # HORDE fork — Fortissimo additions (all optional, additive to nvk schema)
 pillar: people_org|process_workflows|technology|third_party
@@ -485,3 +485,5 @@ Tags are lowercase, hyphenated. Prefer specific over general:
 - Bad: `ai`, `ml`, `tech`
 
 Normalize across the wiki — no near-duplicates like `ml` vs `machine-learning`.
+
+When a topic ships `wiki/references/tag-vocabulary.md`, prefer tags from that table; add new tags there before using them in articles.
